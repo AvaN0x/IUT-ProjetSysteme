@@ -56,3 +56,7 @@ desktop.ini
 
 # VSCode folder
 .vscode
+
+# Compiled files
+src/server
+src/client
