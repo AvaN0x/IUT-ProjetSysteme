@@ -7,7 +7,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include "server.h"
+
 #define PORT 6000
+#define BUFFER_SIZE 100
 
 int main()
 {
@@ -18,7 +21,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    char buffer[100];
     struct sockaddr_in coordonneesServeur;
     memset(&coordonneesServeur, 0x00, sizeof(struct sockaddr_in)); // allocate memory
     coordonneesServeur.sin_family = PF_INET;                       // Set protocal family
@@ -28,12 +30,12 @@ int main()
     if (bind(fdSocketAttente, (struct sockaddr *)&coordonneesServeur,
              sizeof(coordonneesServeur)) == -1)
     {
-        printf("Bind error\n");
+        printf("Bind error, PORT may already be in use.\n");
         exit(EXIT_FAILURE);
     }
     if (listen(fdSocketAttente, 5) == -1)
     {
-        printf("Listen error\n");
+        printf("Listen error.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -54,23 +56,47 @@ int main()
         }
         printf("Connected client : %s\n", inet_ntoa(coordonneesAppelant.sin_addr)); // display client IP
 
-        //! temporary loop to chat 2 times with the client
-        for (int i = 0; i < 2; i++)
-        {
-            int nbRecu = recv(fdSocketCommunication, buffer, 99, 0);
-            if (nbRecu > 0)
-            {
-                buffer[nbRecu] = 0; // set last char of the buffer
-                printf("Received : %s\n", buffer);
-            }
-            printf("Enter some text : ");
-            fgets(buffer, 100, stdin);
-            send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
-        }
+        UserConnected(fdSocketCommunication);
+
         close(fdSocketCommunication);
         printf("\n");
     }
     close(fdSocketAttente);
 
     return EXIT_SUCCESS;
+}
+
+// call function that manage the user connection
+void UserConnected(int fdSocketCommunication)
+{
+    char buffer[BUFFER_SIZE];
+
+    //! temporary loop to chat 2 times with the client
+    for (int i = 0; i < 2; i++)
+    {
+        snprintf(buffer, BUFFER_SIZE, "Send me something please (%d)", i);
+        send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
+
+        PromptUser(fdSocketCommunication, buffer);
+        int bufSize = recv(fdSocketCommunication, buffer, BUFFER_SIZE - 1, 0);
+        if (bufSize > 0)
+        {
+            buffer[bufSize] = '\0'; // set last char of the buffer
+            printf("Received : %s\n", buffer);
+        }
+    }
+
+    DisconnectUser(fdSocketCommunication, buffer);
+}
+
+void PromptUser(int fdSocketCommunication, char *buffer)
+{
+    snprintf(buffer, BUFFER_SIZE, "\n");                    //? if length is equal to 1, then the user will be prompted
+    send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
+}
+
+void DisconnectUser(int fdSocketCommunication, char *buffer)
+{
+    snprintf(buffer, BUFFER_SIZE, "END_CONNECTION");        //? this string will disconnect the user
+    send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
 }
