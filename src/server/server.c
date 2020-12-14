@@ -16,42 +16,43 @@
 
 int main()
 {
-    int fdSocketAttente = socket(PF_INET, SOCK_STREAM, 0);
-    if (fdSocketAttente < 0)
+    int serverSocket = socket(PF_INET, SOCK_STREAM, 0);
+    if (serverSocket < 0)
     {
         printf("Incorrect socket\n");
         exit(EXIT_FAILURE);
     }
 
-    struct sockaddr_in coordonneesServeur;
-    memset(&coordonneesServeur, 0x00, sizeof(struct sockaddr_in)); // allocate memory
-    coordonneesServeur.sin_family = PF_INET;                       // Set protocal family
-    coordonneesServeur.sin_addr.s_addr = htonl(INADDR_ANY);        // set address
-    coordonneesServeur.sin_port = htons(PORT);                     // set address port
+    struct sockaddr_in serverAddr;
+    memset(&serverAddr, 0x00, sizeof(struct sockaddr_in)); // allocate memory
+    serverAddr.sin_family = PF_INET;                       // Set protocal family
+    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);        // set address
+    serverAddr.sin_port = htons(PORT);                     // set address port
 
-    if (bind(fdSocketAttente, (struct sockaddr *)&coordonneesServeur,
-             sizeof(coordonneesServeur)) == -1)
+    if (bind(serverSocket, (struct sockaddr *)&serverAddr,
+             sizeof(serverAddr)) == -1)
     {
         printf("Bind error, PORT may already be in use.\n");
         exit(EXIT_FAILURE);
     }
-    if (listen(fdSocketAttente, 5) == -1)
+    if (listen(serverSocket, 5) == -1)
     {
         printf("Listen error.\n");
         exit(EXIT_FAILURE);
     }
 
     // Main loop
-    socklen_t tailleCoord = sizeof(struct sockaddr_in);
-    int sortie = 0;
-    while (sortie != 1)
+    int sockaddr_in_size = sizeof(struct sockaddr_in);
+    while (1)
     {
         printf("Waiting for connection :\n");
         connectionStruct myConnectionStruct;
 
-        if ((myConnectionStruct.fdSocketCommunication = accept(fdSocketAttente, (struct sockaddr *)&myConnectionStruct.coordonneesAppelant,
-                                                               &tailleCoord)) != -1)
+        //? waiting for a connection to come
+        if ((myConnectionStruct.communicationID = accept(serverSocket, (struct sockaddr *)&myConnectionStruct.connectedAddr,
+                                                         &sockaddr_in_size)) != -1)
         {
+            //? create the thread that will manage the connection
             pthread_t thread;
             int threadReturn = pthread_create(&thread, NULL, connectionThread, (void *)&myConnectionStruct);
         }
@@ -60,7 +61,7 @@ int main()
             printf("Connection acceptation error\n");
         }
     }
-    close(fdSocketAttente);
+    close(serverSocket);
 
     return EXIT_SUCCESS;
 }
@@ -68,29 +69,27 @@ int main()
 void *connectionThread(void *args)
 {
     connectionStruct *connection = (connectionStruct *)args;
-    printf("Connected client : %s\n", inet_ntoa(connection->coordonneesAppelant.sin_addr)); // display client IP
+    printf("Connected client : %s\n", inet_ntoa(connection->connectedAddr.sin_addr)); //? display client IP
 
-    UserConnected(connection->fdSocketCommunication);
+    UserConnected(connection->communicationID);
 
-    close(connection->fdSocketCommunication);
-    printf("\n");
-
+    close(connection->communicationID);
     pthread_exit(NULL);
 }
 
 // call function that manage the user connection
-void UserConnected(int fdSocketCommunication)
+void UserConnected(int communicationID)
 {
     char buffer[BUFFER_SIZE];
 
-    //! temporary loop to chat 2 times with the client
+    //! temporary loop ask client 2 strings
     for (int i = 0; i < 2; i++)
     {
         snprintf(buffer, BUFFER_SIZE, "Send me something please (%d)", i);
-        send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
+        send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
 
-        PromptUser(fdSocketCommunication, buffer);
-        int bufSize = recv(fdSocketCommunication, buffer, BUFFER_SIZE - 1, 0);
+        PromptUser(communicationID, buffer);
+        int bufSize = recv(communicationID, buffer, BUFFER_SIZE - 1, 0);
         if (bufSize > 0)
         {
             buffer[bufSize] = '\0'; // set last char of the buffer
@@ -98,17 +97,17 @@ void UserConnected(int fdSocketCommunication)
         }
     }
 
-    DisconnectUser(fdSocketCommunication, buffer);
+    DisconnectUser(communicationID, buffer);
 }
 
-void PromptUser(int fdSocketCommunication, char *buffer)
+void PromptUser(int communicationID, char *buffer)
 {
-    snprintf(buffer, BUFFER_SIZE, "\n");                    //? if length is equal to 1, then the user will be prompted
-    send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
+    snprintf(buffer, BUFFER_SIZE, "\n");              //? if length is equal to 1, then the user will be prompted
+    send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
 }
 
-void DisconnectUser(int fdSocketCommunication, char *buffer)
+void DisconnectUser(int communicationID, char *buffer)
 {
-    snprintf(buffer, BUFFER_SIZE, "END_CONNECTION");        //? this string will disconnect the user
-    send(fdSocketCommunication, buffer, strlen(buffer), 0); // send buffer to client
+    snprintf(buffer, BUFFER_SIZE, "END_CONNECTION");  //? this string will disconnect the user
+    send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
 }

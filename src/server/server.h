@@ -3,8 +3,8 @@
 
 typedef struct
 {
-    int fdSocketCommunication;
-    struct sockaddr_in coordonneesAppelant;
+    int communicationID;
+    struct sockaddr_in connectedAddr;
 } connectionStruct;
 
 void *connectionThread(void *);
