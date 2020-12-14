@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <stddef.h>
+#include <pthread.h>
 
 #include "server.h"
 
@@ -39,31 +41,41 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    struct sockaddr_in coordonneesAppelant;
-    socklen_t tailleCoord = sizeof(coordonneesAppelant);
-
     // Main loop
+    socklen_t tailleCoord = sizeof(struct sockaddr_in);
     int sortie = 0;
     while (sortie != 1)
     {
         printf("Waiting for connection :\n");
-        int fdSocketCommunication;
-        if ((fdSocketCommunication = accept(fdSocketAttente, (struct sockaddr *)&coordonneesAppelant,
-                                            &tailleCoord)) == -1)
+        connectionStruct myConnectionStruct;
+
+        if ((myConnectionStruct.fdSocketCommunication = accept(fdSocketAttente, (struct sockaddr *)&myConnectionStruct.coordonneesAppelant,
+                                                               &tailleCoord)) != -1)
+        {
+            pthread_t thread;
+            int threadReturn = pthread_create(&thread, NULL, connectionThread, (void *)&myConnectionStruct);
+        }
+        else
         {
             printf("Connection acceptation error\n");
-            exit(EXIT_FAILURE);
         }
-        printf("Connected client : %s\n", inet_ntoa(coordonneesAppelant.sin_addr)); // display client IP
-
-        UserConnected(fdSocketCommunication);
-
-        close(fdSocketCommunication);
-        printf("\n");
     }
     close(fdSocketAttente);
 
     return EXIT_SUCCESS;
+}
+
+void *connectionThread(void *args)
+{
+    connectionStruct *connection = (connectionStruct *)args;
+    printf("Connected client : %s\n", inet_ntoa(connection->coordonneesAppelant.sin_addr)); // display client IP
+
+    UserConnected(connection->fdSocketCommunication);
+
+    close(connection->fdSocketCommunication);
+    printf("\n");
+
+    pthread_exit(NULL);
 }
 
 // call function that manage the user connection
