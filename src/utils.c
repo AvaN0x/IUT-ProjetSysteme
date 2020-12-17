@@ -1,10 +1,19 @@
 #include <string.h>
 #include "utils.h"
 
+stream_t create_stream()
+{
+    stream_t s;
+    s.content = NULL;
+    s.type = -1;
+
+    return s;
+}
+
 void init_stream(stream_t *s, uint8_t type)
 {
-    // if (s->content != NULL)
-    //     free(s->content);
+    if (s->content != NULL)
+        free(s->content);
 
     s->content = NULL;
     s->type = type;

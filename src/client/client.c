@@ -44,7 +44,7 @@ int main()
 
 void ConnectedToServer(int fdSocket)
 {
-    stream_t stream; // received stream
+    stream_t stream = create_stream(); // received stream
 
     char serStream[STREAM_SIZE]; // serialized stream
     char string[BUFFER_SIZE];

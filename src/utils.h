@@ -21,6 +21,7 @@ enum
     END_CONNECTION
 };
 
+stream_t create_stream();
 void init_stream(stream_t *, uint8_t);
 void set_content(stream_t *, void *);
 void destroy_stream(stream_t *);

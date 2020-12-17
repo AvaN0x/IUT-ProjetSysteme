@@ -79,8 +79,8 @@ void *connectionThread(void *args)
 void UserConnected(int communicationID)
 {
 
-    stream_t stream;             // stream that is used with this client
-    char serStream[STREAM_SIZE]; // serialized stream
+    stream_t stream = create_stream(); // stream that is used with this client
+    char serStream[STREAM_SIZE];       // serialized stream
     char string[BUFFER_SIZE];
 
     //! temporary loop ask client 2 strings
