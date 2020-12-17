@@ -66,12 +66,12 @@ int main()
 
 void *connectionThread(void *args)
 {
-    connectionStruct *connection = (connectionStruct *)args;
-    printf("Connected client : %s\n", inet_ntoa(connection->connectedAddr.sin_addr)); //? display client IP
+    connectionStruct connection = *(connectionStruct *)args;
+    printf("Connected client : %s (id : %d)\n", inet_ntoa(connection.connectedAddr.sin_addr), connection.communicationID); //? display client IP
 
-    UserConnected(connection->communicationID);
+    UserConnected(connection.communicationID);
 
-    close(connection->communicationID);
+    close(connection.communicationID);
     pthread_exit(NULL);
 }
 
@@ -98,7 +98,7 @@ void UserConnected(int communicationID)
         if (bufSize > 0)
         {
             string[bufSize] = '\0'; // set last char of the buffer
-            printf("Received : %s\n", string);
+            printf("%d | Received : %s\n", communicationID, string);
         }
     }
 

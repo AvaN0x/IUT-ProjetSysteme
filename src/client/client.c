@@ -44,7 +44,8 @@ int main()
 
 void ConnectedToServer(int fdSocket)
 {
-    stream_t stream;             // received stream
+    stream_t stream; // received stream
+
     char serStream[STREAM_SIZE]; // serialized stream
     char string[BUFFER_SIZE];
 
@@ -54,8 +55,6 @@ void ConnectedToServer(int fdSocket)
         if (bufSize > 0)
         {
             unserialize_stream(serStream, &stream);
-
-            printf("type : %d\n", stream.type);
 
             if (stream.type == END_CONNECTION)
                 break;
