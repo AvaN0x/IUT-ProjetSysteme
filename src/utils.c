@@ -1,7 +1,7 @@
 #include <string.h>
 #include "utils.h"
 
-void init_stream(stream *s, uint8_t type)
+void init_stream(stream_t *s, uint8_t type)
 {
     // if (s->content != NULL)
     //     free(s->content);
@@ -10,7 +10,7 @@ void init_stream(stream *s, uint8_t type)
     s->type = type;
 }
 
-void set_content(stream *s, void *content)
+void set_content(stream_t *s, void *content)
 {
     if (s->content != NULL)
         free(s->content);
@@ -35,13 +35,13 @@ void set_content(stream *s, void *content)
     }
 }
 
-void destroy_stream(stream *s)
+void destroy_stream(stream_t *s)
 {
     if (s->content != NULL)
         free(s->content);
 }
 
-size_t serialize_stream(stream *s, void *buffer)
+size_t serialize_stream(stream_t *s, void *buffer)
 {
     *((uint8_t *)buffer) = s->type;
     buffer += sizeof(uint8_t);
@@ -66,7 +66,7 @@ size_t serialize_stream(stream *s, void *buffer)
     }
 }
 
-void unserialize_stream(void *buffer, stream *s)
+void unserialize_stream(void *buffer, stream_t *s)
 {
     init_stream(s, *((uint8_t *)buffer));
 

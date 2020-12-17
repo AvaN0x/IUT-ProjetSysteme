@@ -9,10 +9,8 @@
 #include <stddef.h>
 #include <pthread.h>
 
+#include "../utils.h"
 #include "server.h"
-
-#define PORT 6000
-#define BUFFER_SIZE 100
 
 int main()
 {
@@ -80,34 +78,37 @@ void *connectionThread(void *args)
 // call function that manage the user connection
 void UserConnected(int communicationID)
 {
-    char buffer[BUFFER_SIZE];
+
+    stream_t stream;             // stream that is used with this client
+    char serStream[STREAM_SIZE]; // serialized stream
+    char string[BUFFER_SIZE];
 
     //! temporary loop ask client 2 strings
     for (int i = 0; i < 2; i++)
     {
-        snprintf(buffer, BUFFER_SIZE, "Send me something please (%d)", i);
-        send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
+        init_stream(&stream, WRITE_AND_PROMPT);
+        snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
+        set_content(&stream, string);
+        serialize_stream(&stream, serStream);
 
-        PromptUser(communicationID, buffer);
-        int bufSize = recv(communicationID, buffer, BUFFER_SIZE - 1, 0);
+        send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+
+        // PromptUser(communicationID, buffer);
+        int bufSize = recv(communicationID, string, BUFFER_SIZE, 0);
         if (bufSize > 0)
         {
-            buffer[bufSize] = '\0'; // set last char of the buffer
-            printf("Received : %s\n", buffer);
+            string[bufSize] = '\0'; // set last char of the buffer
+            printf("Received : %s\n", string);
         }
     }
 
-    DisconnectUser(communicationID, buffer);
+    DisconnectUser(communicationID, &stream, serStream);
+    destroy_stream(&stream);
 }
 
-void PromptUser(int communicationID, char *buffer)
+void DisconnectUser(int communicationID, stream_t *s, char *serStream)
 {
-    snprintf(buffer, BUFFER_SIZE, "\n");              //? if length is equal to 1, then the user will be prompted
-    send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
-}
-
-void DisconnectUser(int communicationID, char *buffer)
-{
-    snprintf(buffer, BUFFER_SIZE, "END_CONNECTION");  //? this string will disconnect the user
-    send(communicationID, buffer, strlen(buffer), 0); // send buffer to client
+    init_stream(s, END_CONNECTION);
+    serialize_stream(s, serStream);
+    send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 }

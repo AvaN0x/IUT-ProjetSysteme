@@ -7,11 +7,10 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#include "../utils.h"
 #include "client.h"
 
-#define PORT 6000
 #define ADDRESS "127.0.0.1"
-#define BUFFER_SIZE 100
 
 int main()
 {
@@ -45,27 +44,47 @@ int main()
 
 void ConnectedToServer(int fdSocket)
 {
-    char buffer[BUFFER_SIZE];
-    char END_CONNECTION[] = "END_CONNECTION\0";
+    stream_t stream;             // received stream
+    char serStream[STREAM_SIZE]; // serialized stream
+    char string[BUFFER_SIZE];
 
     while (1) //? wait for the server to ask the user to disconnect
     {
-        int bufSize = recv(fdSocket, buffer, BUFFER_SIZE - 1, 0);
-        if (bufSize > 1) //? > 1 mean that the server send a string
+        int bufSize = recv(fdSocket, serStream, STREAM_SIZE, 0);
+        if (bufSize > 0)
         {
-            buffer[bufSize] = '\0';                  // set last char of the buffer
-            if (strcmp(buffer, END_CONNECTION) == 0) //! will close the loop and disconnect the user
-                break;
-            printf("Received : %s\n", buffer);
-        }
-        else //? <= 1 mean that the server prompted the user
-        {
-            printf("Enter some text : ");
-            enterText(buffer, BUFFER_SIZE);
+            unserialize_stream(serStream, &stream);
 
-            send(fdSocket, buffer, strlen(buffer), 0); // send buffer to server
+            printf("type : %d\n", stream.type);
+
+            if (stream.type == END_CONNECTION)
+                break;
+
+            switch (stream.type)
+            {
+            case WRITE:
+            case WRITE_AND_PROMPT:
+                printf("%s", (char *)stream.content);
+                break;
+            default:
+                break;
+            }
+
+            switch (stream.type)
+            {
+            case PROMPT:
+            case WRITE_AND_PROMPT:
+                enterText(string, BUFFER_SIZE);
+
+                send(fdSocket, string, strlen(string), 0); // send buffer to server
+
+                break;
+            default:
+                break;
+            }
         }
     }
+    destroy_stream(&stream);
 }
 
 /*

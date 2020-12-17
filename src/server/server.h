@@ -9,7 +9,6 @@ typedef struct
 
 void *connectionThread(void *);
 void UserConnected(int);
-void PromptUser(int, char *);
-void DisconnectUser(int, char *);
+void DisconnectUser(int, stream_t *, char *);
 
 #endif

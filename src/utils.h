@@ -11,7 +11,7 @@ typedef struct
 {
     void *content;
     uint8_t type;
-} stream;
+} stream_t;
 
 enum
 {
@@ -21,11 +21,11 @@ enum
     END_CONNECTION
 };
 
-void init_stream(stream *, uint8_t);
-void set_content(stream *, void *);
-void destroy_stream(stream *);
+void init_stream(stream_t *, uint8_t);
+void set_content(stream_t *, void *);
+void destroy_stream(stream_t *);
 
-size_t serialize_stream(stream *, void *);
-void unserialize_stream(void *, stream *);
+size_t serialize_stream(stream_t *, void *);
+void unserialize_stream(void *, stream_t *);
 
 #endif
