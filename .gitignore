@@ -5,5 +5,4 @@ desktop.ini
 .vscode
 
 # Compiled files
-src/server/server
-src/client/client
+bin/
