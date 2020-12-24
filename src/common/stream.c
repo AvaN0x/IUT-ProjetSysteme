@@ -1,5 +1,5 @@
 #include <string.h>
-#include "utils.h"
+#include "stream.h"
 
 stream_t create_stream()
 {

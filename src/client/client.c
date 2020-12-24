@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-#include "../utils.h"
+#include "../common/stream.h"
 #include "client.h"
 
 #define ADDRESS "127.0.0.1"

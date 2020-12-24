@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <pthread.h>
 
-#include "../utils.h"
+#include "../common/stream.h"
 #include "server.h"
 
 int main()
