@@ -73,16 +73,15 @@ void *connectionThread(void *args)
     connectionStruct connection = *(connectionStruct *)args;
     printf("Connected client : %s (id : %d)\n", inet_ntoa(connection.connectedAddr.sin_addr), connection.communicationID); //? display client IP
 
-    UserConnected(connection.communicationID);
+    UserConnected(connection.communicationID, connection.concertConfig);
 
     close(connection.communicationID);
     pthread_exit(NULL);
 }
 
 // call function that manage the user connection
-void UserConnected(int communicationID)
+void UserConnected(int communicationID, concertConfigStruct *concertConfig)
 {
-
     stream_t stream = create_stream(); // stream that is used with this client
     char serStream[STREAM_SIZE];       // serialized stream
     char string[BUFFER_SIZE];
