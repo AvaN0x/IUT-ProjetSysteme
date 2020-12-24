@@ -3,8 +3,6 @@
 
 #include "../common/seats.h"
 
-#define SEAT_AMOUNT 100
-
 typedef struct
 {
     seatStruct seats[SEAT_AMOUNT];

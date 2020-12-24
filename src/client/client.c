@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#include "../common/seats.h"
 #include "../common/stream.h"
 #include "client.h"
 
@@ -48,6 +49,7 @@ void ConnectedToServer(int fdSocket)
 
     char serStream[STREAM_SIZE]; // serialized stream
     char string[BUFFER_SIZE];
+    bool *seats;
 
     while (1) //? wait for the server to ask the user to disconnect
     {
@@ -65,6 +67,16 @@ void ConnectedToServer(int fdSocket)
             case WRITE_AND_PROMPT:
                 printf("%s", (char *)stream.content);
                 break;
+            case PROMPT_WANTED_SEAT:
+                // seats = (bool *)stream.content;
+                // for (int i = 0; i < SEAT_AMOUNT; i++)
+                // {
+                //     printf("seats %d : %d \n", i, seats[i]);
+                // }
+                dispSeats((bool *)stream.content);
+
+                break;
+
             default:
                 break;
             }
@@ -78,6 +90,7 @@ void ConnectedToServer(int fdSocket)
                 send(fdSocket, string, strlen(string), 0); // send buffer to server
 
                 break;
+
             default:
                 break;
             }

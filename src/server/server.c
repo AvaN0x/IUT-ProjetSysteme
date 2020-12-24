@@ -86,6 +86,17 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     char serStream[STREAM_SIZE];       // serialized stream
     char string[BUFFER_SIZE];
 
+    // concertConfig->seats[communicationID].isOccupied = 1; //? just a test
+
+    //! sending client the list of available seats
+    init_stream(&stream, PROMPT_WANTED_SEAT);
+    bool *seats = getSeatsStatus(concertConfig);
+    set_content(&stream, seats);
+    free(seats);
+    serialize_stream(&stream, serStream);
+    unserialize_stream(serStream, &stream);
+    send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+
     //! temporary loop ask client 2 strings
     for (int i = 0; i < 2; i++)
     {

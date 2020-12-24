@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#define SEAT_AMOUNT 100
 #define NAME_SIZE 100
 #define CODE_LENGTH 10
 
@@ -16,5 +17,6 @@ typedef struct
 
 seatStruct initSeat();
 bool seatIsOccupied(seatStruct *);
+void dispSeats(bool *);
 
 #endif
