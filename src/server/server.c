@@ -11,6 +11,7 @@
 
 #include "../common/stream.h"
 #include "server.h"
+#include "concert.h"
 
 int main()
 {
@@ -38,6 +39,8 @@ int main()
         printf("Listen error.\n");
         exit(EXIT_FAILURE);
     }
+
+    concertConfigStruct concertConfig = initConcert();
 
     // Main loop
     int sockaddr_in_size = sizeof(struct sockaddr_in);
