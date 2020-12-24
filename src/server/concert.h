@@ -11,5 +11,6 @@ typedef struct
 } concertConfigStruct;
 
 concertConfigStruct initConcert();
+bool *getSeatsStatus(concertConfigStruct *);
 
 #endif

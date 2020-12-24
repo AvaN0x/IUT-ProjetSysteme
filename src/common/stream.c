@@ -1,5 +1,6 @@
 #include <string.h>
 #include "stream.h"
+#include "../server/concert.h"
 
 stream_t create_stream()
 {
@@ -37,6 +38,11 @@ void set_content(stream_t *s, void *content)
         len = strlen((char *)content);
         s->content = malloc(len * sizeof(char));
         memcpy(s->content, content, len);
+        break;
+
+    case PROMPT_WANTED_SEAT:
+        s->content = malloc(SEAT_AMOUNT * sizeof(bool));
+        memcpy(s->content, content, SEAT_AMOUNT);
         break;
 
     default:

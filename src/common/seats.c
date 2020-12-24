@@ -11,3 +11,8 @@ seatStruct initSeat()
 
     return seat;
 }
+
+bool seatIsOccupied(seatStruct *seat)
+{
+    return seat->isOccupied;
+}

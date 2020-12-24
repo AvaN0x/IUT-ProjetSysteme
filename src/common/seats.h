@@ -15,5 +15,6 @@ typedef struct
 } seatStruct;
 
 seatStruct initSeat();
+bool seatIsOccupied(seatStruct *);
 
 #endif

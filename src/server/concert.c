@@ -15,3 +15,14 @@ concertConfigStruct initConcert()
 
     return concertConfig;
 }
+
+bool *getSeatsStatus(concertConfigStruct *config)
+{
+    bool *seats = malloc(SEAT_AMOUNT * sizeof(bool));
+    for (int i = 0; i < SEAT_AMOUNT; i++)
+    {
+        seats[i] = config->seats[i].isOccupied;
+    }
+
+    return seats;
+}
