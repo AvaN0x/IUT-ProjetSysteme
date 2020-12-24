@@ -11,7 +11,6 @@
 
 #include "../common/stream.h"
 #include "server.h"
-#include "concert.h"
 
 int main()
 {
@@ -40,6 +39,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    //? init the concert structure that will contain every seats
     concertConfigStruct concertConfig = initConcert();
 
     // Main loop
@@ -48,6 +48,7 @@ int main()
     {
         printf("Waiting for connection :\n");
         connectionStruct myConnectionStruct;
+        myConnectionStruct.concertConfig = &concertConfig; // set the address of the concertConfig variable
 
         //? waiting for a connection to come
         if ((myConnectionStruct.communicationID = accept(serverSocket, (struct sockaddr *)&myConnectionStruct.connectedAddr,
