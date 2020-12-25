@@ -92,9 +92,12 @@ void ConnectedToServer(int fdSocket)
             {
             case PROMPT:
             case STRING_AND_PROMPT:
+                init_stream(&stream, STRING);
                 enterText(string, BUFFER_SIZE);
+                set_content(&stream, string);
+                serialize_stream(&stream, serStream);
 
-                send(fdSocket, string, strlen(string), 0); // send buffer to server
+                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
 
                 break;
 

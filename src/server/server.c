@@ -119,12 +119,12 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
 
         send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
-        // PromptUser(communicationID, buffer);
-        int bufSize = recv(communicationID, string, BUFFER_SIZE, 0);
+        int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
         if (bufSize > 0)
         {
-            string[bufSize] = '\0'; // set last char of the buffer
-            printf("%d | Received : %s\n", communicationID, string);
+            unserialize_stream(serStream, &stream);
+
+            printf("%d | Received : %s\n", communicationID, (char *)stream.content);
         }
     }
 
