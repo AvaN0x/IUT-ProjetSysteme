@@ -79,7 +79,7 @@ int main()
 void *connectionThread(void *args)
 {
     connectionStruct connection = *(connectionStruct *)args;
-    printf("Connected client : %s (id : %d)\n", inet_ntoa(connection.connectedAddr.sin_addr), connection.communicationID); //? display client IP
+    printf("%d | Connected client : %s\n", connection.communicationID, inet_ntoa(connection.connectedAddr.sin_addr)); //? display client IP
 
     UserConnected(connection.communicationID, connection.concertConfig);
 
