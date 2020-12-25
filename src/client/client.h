@@ -4,5 +4,6 @@
 void ConnectedToServer(int);
 void clearBuffer();
 int enterText(char *, int);
+int enterInt(char *, int, int, int);
 
 #endif

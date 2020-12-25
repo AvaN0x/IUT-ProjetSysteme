@@ -131,6 +131,28 @@ int enterText(char *buffer, int length)
 }
 
 /**
+ * Allow to enter an int
+ * @param buffer the buffer to fill
+ * @param length the max length of the string
+ * @param min min value
+ * @param max max value
+ * @return the prompted int
+ */
+int enterInt(char *buffer, int length, int min, int max)
+{
+    int ret;
+    do
+    {
+        enterText(buffer, length);
+
+        ret = (int)strtol(buffer, NULL, 10); // convert to int
+        if (ret < min || ret > max)
+            printf("Veuillez rentrer un entier entre %d et %d : ", min, max);
+    } while (ret < min || ret > max);
+    return ret;
+}
+
+/**
  * Function that clear the buffer of its content
  */
 void clearBuffer()
