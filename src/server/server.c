@@ -145,7 +145,9 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
         send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-        if (bufSize > 0)
+        if (bufSize < 1)
+            loop = 0;
+        else
         {
             unserialize_stream(serStream, &stream);
 
