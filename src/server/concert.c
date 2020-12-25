@@ -5,6 +5,10 @@
 #include "concert.h"
 #include "../common/seats.h"
 
+/**
+ * Initialize a concertConfigStruct instance
+ * @return the concert configuration
+ */
 concertConfigStruct initConcert()
 {
     concertConfigStruct concertConfig = *(concertConfigStruct *)malloc(sizeof(concertConfigStruct));
@@ -16,6 +20,11 @@ concertConfigStruct initConcert()
     return concertConfig;
 }
 
+/**
+ * Create an array (bool[]) of occupied seats from the concert configuration
+ * @param config the concert configuration
+ * @return the seats array
+ */
 bool *getSeatsStatus(concertConfigStruct *config)
 {
     bool *seats = malloc(SEAT_AMOUNT * sizeof(bool));

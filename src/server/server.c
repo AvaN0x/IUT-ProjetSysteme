@@ -12,6 +12,10 @@
 #include "../common/stream.h"
 #include "server.h"
 
+/**
+ * Main function that create the socket, create the concert, and manage client connections
+ * @return exit status (EXIT_FAILURE || EXIT_SUCCESS)
+ */
 int main()
 {
     int serverSocket = socket(PF_INET, SOCK_STREAM, 0);
@@ -68,6 +72,10 @@ int main()
     return EXIT_SUCCESS;
 }
 
+/**
+ * The thread that will manage the connection
+ * @param args instance of connectionStruct as (void *)
+ */
 void *connectionThread(void *args)
 {
     connectionStruct connection = *(connectionStruct *)args;
@@ -79,7 +87,12 @@ void *connectionThread(void *args)
     pthread_exit(NULL);
 }
 
-// call function that manage the user connection
+/**
+ * Call function that manage the user connection
+ * @param communicationID the id of the communication
+ * @param concertConfig address of the concert configuration
+ * @return true if the seat is occupied, else false
+ */
 void UserConnected(int communicationID, concertConfigStruct *concertConfig)
 {
     stream_t stream = create_stream(); // stream that is used with this client
@@ -120,6 +133,12 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     destroy_stream(&stream);
 }
 
+/**
+ * Disconnect an user from the server
+ * @param communicationID the id of the communication
+ * @param s the stream to send
+ * @param serStream the buffer that will contain the serialized stream
+ */
 void DisconnectUser(int communicationID, stream_t *s, char *serStream)
 {
     init_stream(s, END_CONNECTION);

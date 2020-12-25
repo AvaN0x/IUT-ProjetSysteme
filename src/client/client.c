@@ -13,6 +13,10 @@
 
 #define ADDRESS "127.0.0.1"
 
+/**
+ * Main function that connect to the server and start the conversation
+ * @return exit status (EXIT_FAILURE || EXIT_SUCCESS)
+ */
 int main()
 {
     // Get the socket
@@ -36,13 +40,16 @@ int main()
     }
     printf("Connected to %s:%d\n", ADDRESS, PORT);
 
-    // call function that manage the user connection
     ConnectedToServer(fdSocket);
 
     close(fdSocket);
     return EXIT_SUCCESS;
 }
 
+/**
+ * Function that manage the user connection
+ * @param fdSocket the socket of the communication
+ */
 void ConnectedToServer(int fdSocket)
 {
     stream_t stream = create_stream(); // received stream
@@ -99,9 +106,12 @@ void ConnectedToServer(int fdSocket)
     destroy_stream(&stream);
 }
 
-/*
-    allow to enter text, and if the text entered is too long, then it will clear the buffer
-*/
+/**
+ * Allow to enter text, and if the text entered is too long, then it will clear the buffer
+ * @param buffer the buffer to fill
+ * @param length the max length of the string
+ * @return exit status (EXIT_FAILURE || EXIT_SUCCESS)
+ */
 int enterText(char *buffer, int length)
 {
     if (fgets(buffer, length, stdin) != NULL)
@@ -111,7 +121,7 @@ int enterText(char *buffer, int length)
             *lastCharPos = '\0';
         else
             clearBuffer();
-        return 1;
+        return EXIT_SUCCESS;
     }
     else
     {
@@ -120,6 +130,9 @@ int enterText(char *buffer, int length)
     }
 }
 
+/**
+ * Function that clear the buffer of its content
+ */
 void clearBuffer()
 {
     int c = 0;

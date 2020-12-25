@@ -2,6 +2,10 @@
 #include "stream.h"
 #include "../server/concert.h"
 
+/**
+ * Create a stream, initialize it, and return it
+ * @return the stream
+ */
 stream_t create_stream()
 {
     stream_t s;
@@ -11,6 +15,11 @@ stream_t create_stream()
     return s;
 }
 
+/**
+ * Reinitialize a stream with a type, and the content set to null
+ * @param s the stream to reset
+ * @param type the new type
+ */
 void init_stream(stream_t *s, uint8_t type)
 {
     if (s->content != NULL)
@@ -20,6 +29,11 @@ void init_stream(stream_t *s, uint8_t type)
     s->type = type;
 }
 
+/**
+ * Se the content of a stream
+ * @param s the stream
+ * @param content the new content
+ */
 void set_content(stream_t *s, void *content)
 {
     if (s->content != NULL)
@@ -50,12 +64,22 @@ void set_content(stream_t *s, void *content)
     }
 }
 
+/**
+ * Free the memory used by the content of a stream
+ * @param s the stream
+ */
 void destroy_stream(stream_t *s)
 {
     if (s->content != NULL)
         free(s->content);
 }
 
+/**
+ * Serialize a stream into a buffer
+ * @param s the stream
+ * @param buffer the buffer to fill in
+ * @return the size of the buffer
+ */
 size_t serialize_stream(stream_t *s, void *buffer)
 {
     *((uint8_t *)buffer) = s->type;
@@ -85,6 +109,11 @@ size_t serialize_stream(stream_t *s, void *buffer)
     }
 }
 
+/**
+ * Unserialize a buffer into a stream
+ * @param buffer the buffer
+ * @param s the stream to fill in
+ */
 void unserialize_stream(void *buffer, stream_t *s)
 {
     init_stream(s, *((uint8_t *)buffer));
