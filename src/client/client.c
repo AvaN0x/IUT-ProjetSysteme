@@ -70,28 +70,22 @@ void ConnectedToServer(int fdSocket)
 
             switch (stream.type)
             {
+            case PROMPT:
+                init_stream(&stream, STRING);
+                enterText(string, BUFFER_SIZE);
+                set_content(&stream, string);
+                serialize_stream(&stream, serStream);
+
+                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
+                break;
+
             case STRING:
-            case STRING_AND_PROMPT:
                 printf("%s", (char *)stream.content);
                 break;
-            case PROMPT_WANTED_SEAT:
-                // seats = (bool *)stream.content;
-                // for (int i = 0; i < SEAT_AMOUNT; i++)
-                // {
-                //     printf("seats %d : %d \n", i, seats[i]);
-                // }
-                dispSeats((bool *)stream.content);
 
-                break;
-
-            default:
-                break;
-            }
-
-            switch (stream.type)
-            {
-            case PROMPT:
             case STRING_AND_PROMPT:
+                printf("%s", (char *)stream.content);
+
                 init_stream(&stream, STRING);
                 enterText(string, BUFFER_SIZE);
                 set_content(&stream, string);
@@ -99,6 +93,9 @@ void ConnectedToServer(int fdSocket)
 
                 send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
 
+                break;
+            case PROMPT_WANTED_SEAT:
+                dispSeats((bool *)stream.content);
                 break;
 
             default:
