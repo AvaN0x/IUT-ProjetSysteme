@@ -98,25 +98,50 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     stream_t stream = create_stream(); // stream that is used with this client
     char serStream[STREAM_SIZE];       // serialized stream
     char string[BUFFER_SIZE];
+    int8_t promptedInt, maxIntValue;
+    bool loop = 1;
 
     // concertConfig->seats[communicationID].isOccupied = 1; //? just a test
 
-    //! sending client the list of available seats
-    init_stream(&stream, PROMPT_WANTED_SEAT);
-    bool *seats = getSeatsStatus(concertConfig);
-    set_content(&stream, seats);
-    free(seats);
-    serialize_stream(&stream, serStream);
-    send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+    // //! sending client the list of available seats
+    // init_stream(&stream, PROMPT_WANTED_SEAT);
+    // bool *seats = getSeatsStatus(concertConfig);
+    // set_content(&stream, seats);
+    // free(seats);
+    // serialize_stream(&stream, serStream);
+    // send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
-    //! temporary loop ask client 2 strings
-    for (int i = 0; i < 2; i++)
+    // //! temporary loop ask client 2 strings
+    // for (int i = 0; i < 2; i++)
+    // {
+    //     init_stream(&stream, STRING_AND_PROMPT);
+    //     snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
+    //     set_content(&stream, string);
+    //     serialize_stream(&stream, serStream);
+
+    //     send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+
+    //     int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+    //     if (bufSize > 0)
+    //     {
+    //         unserialize_stream(serStream, &stream);
+
+    //         printf("%d | Received : %s\n", communicationID, (char *)stream.content);
+    //     }
+    // }
+
+    while (loop)
     {
-        init_stream(&stream, STRING_AND_PROMPT);
-        snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
+        init_stream(&stream, STRING);
+        snprintf(string, BUFFER_SIZE, "*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\nChoix : ");
         set_content(&stream, string);
         serialize_stream(&stream, serStream);
+        send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
+        init_stream(&stream, PROMPT_INT_WITH_MAX);
+        maxIntValue = 2;
+        set_content(&stream, &maxIntValue);
+        serialize_stream(&stream, serStream);
         send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
@@ -124,7 +149,21 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
         {
             unserialize_stream(serStream, &stream);
 
-            printf("%d | Received : %s\n", communicationID, (char *)stream.content);
+            switch (*(int8_t *)stream.content)
+            {
+            case 0:
+                loop = 0;
+                init_stream(&stream, STRING);
+                snprintf(string, BUFFER_SIZE, "Passez une bonne journée, aurevoir !\n");
+                set_content(&stream, string);
+                serialize_stream(&stream, serStream);
+
+                send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+                break;
+
+            default:
+                break;
+            }
         }
     }
 
@@ -143,4 +182,5 @@ void DisconnectUser(int communicationID, stream_t *s, char *serStream)
     init_stream(s, END_CONNECTION);
     serialize_stream(s, serStream);
     send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+    printf("\tClient deconnected (id : %d)\n", communicationID);
 }

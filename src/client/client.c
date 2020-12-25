@@ -56,6 +56,7 @@ void ConnectedToServer(int fdSocket)
 
     char serStream[STREAM_SIZE]; // serialized stream
     char string[BUFFER_SIZE];
+    int8_t promptedInt;
     bool *seats;
 
     while (1) //? wait for the server to ask the user to disconnect
@@ -94,8 +95,18 @@ void ConnectedToServer(int fdSocket)
                 send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
 
                 break;
+
             case PROMPT_WANTED_SEAT:
                 dispSeats((bool *)stream.content);
+                break;
+
+            case PROMPT_INT_WITH_MAX:
+                promptedInt = (int8_t)promptInt(string, BUFFER_SIZE, 0, *(int *)stream.content);
+                init_stream(&stream, INT);
+                set_content(&stream, &promptedInt);
+                serialize_stream(&stream, serStream);
+
+                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
                 break;
 
             default:

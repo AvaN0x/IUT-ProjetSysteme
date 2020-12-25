@@ -48,6 +48,8 @@ void set_content(stream_t *s, void *content)
         break;
 
     case INT:
+    case PROMPT_INT_WITH_MAX:
+
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, content, 1);
         break;
