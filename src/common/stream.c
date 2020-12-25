@@ -98,6 +98,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
         return sizeof(uint8_t);
 
     case INT:
+    case PROMPT_INT_WITH_MAX:
         memcpy(buffer, s->content, 1);
         return sizeof(uint8_t) + sizeof(uint8_t);
 
@@ -132,6 +133,7 @@ void unserialize_stream(void *buffer, stream_t *s)
     switch (s->type)
     {
     case INT:
+    case PROMPT_INT_WITH_MAX:
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, buffer, 1);
         break;
