@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define PORT 6000
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 #define STREAM_SIZE BUFFER_SIZE + 128
 
 typedef struct
