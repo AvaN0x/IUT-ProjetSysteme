@@ -11,8 +11,8 @@ typedef struct
 } connectionStruct;
 
 void *connectionThread(void *);
-void UserConnected(int, concertConfigStruct *);
-void DisconnectUser(int, stream_t *, char *);
+void userConnected(int, concertConfigStruct *);
+void disconnectUser(int, stream_t *, char *);
 void sendString(int, stream_t *, char *, char *, const char *, ...);
 
 #endif

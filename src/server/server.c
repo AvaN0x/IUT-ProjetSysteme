@@ -82,7 +82,7 @@ void *connectionThread(void *args)
     connectionStruct connection = *(connectionStruct *)args;
     printf("%d | Connected client : %s\n", connection.communicationID, inet_ntoa(connection.connectedAddr.sin_addr)); //? display client IP
 
-    UserConnected(connection.communicationID, connection.concertConfig);
+    userConnected(connection.communicationID, connection.concertConfig);
 
     close(connection.communicationID);
     pthread_exit(NULL);
@@ -94,7 +94,7 @@ void *connectionThread(void *args)
  * @param concertConfig address of the concert configuration
  * @return true if the seat is occupied, else false
  */
-void UserConnected(int communicationID, concertConfigStruct *concertConfig)
+void userConnected(int communicationID, concertConfigStruct *concertConfig)
 {
     stream_t stream = create_stream(); // stream that is used with this client
     char serStream[STREAM_SIZE];       // serialized stream
@@ -188,7 +188,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
         }
     }
 
-    DisconnectUser(communicationID, &stream, serStream);
+    disconnectUser(communicationID, &stream, serStream);
     destroy_stream(&stream);
 }
 
@@ -198,7 +198,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
  * @param s the stream to send
  * @param serStream the buffer that will contain the serialized stream
  */
-void DisconnectUser(int communicationID, stream_t *s, char *serStream)
+void disconnectUser(int communicationID, stream_t *s, char *serStream)
 {
     init_stream(s, END_CONNECTION);
     serialize_stream(s, serStream);
