@@ -77,7 +77,7 @@ void ConnectedToServer(int fdSocket)
                 set_content(&stream, string);
                 serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
+                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
                 break;
 
             case STRING:
@@ -92,7 +92,7 @@ void ConnectedToServer(int fdSocket)
                 set_content(&stream, string);
                 serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
+                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
 
                 break;
 
@@ -106,7 +106,7 @@ void ConnectedToServer(int fdSocket)
                 set_content(&stream, &promptedInt);
                 serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, sizeof(serStream), 0); // send buffer to server
+                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
                 break;
 
             default:
