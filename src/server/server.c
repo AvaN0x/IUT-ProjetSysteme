@@ -133,7 +133,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     while (loop)
     {
         init_stream(&stream, STRING);
-        snprintf(string, BUFFER_SIZE, "*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\nChoix : ");
+        snprintf(string, BUFFER_SIZE, "*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
         set_content(&stream, string);
         serialize_stream(&stream, serStream);
         send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
@@ -160,6 +160,27 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
 
                 send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
                 break;
+            case 1:
+                //! temporary loop ask client 2 strings
+                for (int i = 0; i < 2; i++)
+                {
+                    init_stream(&stream, STRING_AND_PROMPT);
+                    snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
+                    set_content(&stream, string);
+                    serialize_stream(&stream, serStream);
+
+                    send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+
+                    int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                    if (bufSize > 0)
+                    {
+                        unserialize_stream(serStream, &stream);
+
+                        printf("%d | Received : %s\n", communicationID, (char *)stream.content);
+                    }
+                }
+
+                break;
 
             default:
                 break;
@@ -182,5 +203,5 @@ void DisconnectUser(int communicationID, stream_t *s, char *serStream)
     init_stream(s, END_CONNECTION);
     serialize_stream(s, serStream);
     send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
-    printf("\tClient deconnected (id : %d)\n", communicationID);
+    printf("%d | Client deconnected\n", communicationID);
 }
