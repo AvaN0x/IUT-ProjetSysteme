@@ -16,6 +16,7 @@ typedef struct
 
 enum
 {
+    INT,
     STRING,
     STRING_AND_PROMPT,
     PROMPT,
