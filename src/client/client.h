@@ -3,7 +3,7 @@
 
 void ConnectedToServer(int);
 void clearBuffer();
-int enterText(char *, int);
-int enterInt(char *, int, int, int);
+int promptString(char *, int);
+int promptInt(char *, int, int, int);
 
 #endif

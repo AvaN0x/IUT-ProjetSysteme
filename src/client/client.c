@@ -72,7 +72,7 @@ void ConnectedToServer(int fdSocket)
             {
             case PROMPT:
                 init_stream(&stream, STRING);
-                enterText(string, BUFFER_SIZE);
+                promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);
                 serialize_stream(&stream, serStream);
 
@@ -87,7 +87,7 @@ void ConnectedToServer(int fdSocket)
                 printf("%s", (char *)stream.content);
 
                 init_stream(&stream, STRING);
-                enterText(string, BUFFER_SIZE);
+                promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);
                 serialize_stream(&stream, serStream);
 
@@ -112,7 +112,7 @@ void ConnectedToServer(int fdSocket)
  * @param length the max length of the string
  * @return exit status (EXIT_FAILURE || EXIT_SUCCESS)
  */
-int enterText(char *buffer, int length)
+int promptString(char *buffer, int length)
 {
     if (fgets(buffer, length, stdin) != NULL)
     {
@@ -138,12 +138,12 @@ int enterText(char *buffer, int length)
  * @param max max value
  * @return the prompted int
  */
-int enterInt(char *buffer, int length, int min, int max)
+int promptInt(char *buffer, int length, int min, int max)
 {
     int ret;
     do
     {
-        enterText(buffer, length);
+        promptString(buffer, length);
 
         ret = (int)strtol(buffer, NULL, 10); // convert to int
         if (ret < min || ret > max)
