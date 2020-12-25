@@ -63,8 +63,8 @@ void ConnectedToServer(int fdSocket)
 
             switch (stream.type)
             {
-            case WRITE:
-            case WRITE_AND_PROMPT:
+            case STRING:
+            case STRING_AND_PROMPT:
                 printf("%s", (char *)stream.content);
                 break;
             case PROMPT_WANTED_SEAT:
@@ -84,7 +84,7 @@ void ConnectedToServer(int fdSocket)
             switch (stream.type)
             {
             case PROMPT:
-            case WRITE_AND_PROMPT:
+            case STRING_AND_PROMPT:
                 enterText(string, BUFFER_SIZE);
 
                 send(fdSocket, string, strlen(string), 0); // send buffer to server

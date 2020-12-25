@@ -100,7 +100,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     //! temporary loop ask client 2 strings
     for (int i = 0; i < 2; i++)
     {
-        init_stream(&stream, WRITE_AND_PROMPT);
+        init_stream(&stream, STRING_AND_PROMPT);
         snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
         set_content(&stream, string);
         serialize_stream(&stream, serStream);

@@ -16,8 +16,8 @@ typedef struct
 
 enum
 {
-    WRITE,
-    WRITE_AND_PROMPT,
+    STRING,
+    STRING_AND_PROMPT,
     PROMPT,
     PROMPT_WANTED_SEAT,
     END_CONNECTION
