@@ -141,15 +141,17 @@ int promptString(char *buffer, int length)
 int promptInt(char *buffer, int length, int min, int max)
 {
     int ret;
-    do
+    char *endPtr;
+    while (1)
     {
         promptString(buffer, length);
 
-        ret = (int)strtol(buffer, NULL, 10); // convert to int
-        if (ret < min || ret > max)
+        ret = (int)strtol(buffer, &endPtr, 10); // convert to int
+        if (buffer == endPtr || ret < min || ret > max)
             printf("Veuillez rentrer un entier entre %d et %d : ", min, max);
-    } while (ret < min || ret > max);
-    return ret;
+        else
+            return ret;
+    }
 }
 
 /**
