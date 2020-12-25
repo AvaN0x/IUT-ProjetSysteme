@@ -107,7 +107,6 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     set_content(&stream, seats);
     free(seats);
     serialize_stream(&stream, serStream);
-    unserialize_stream(serStream, &stream);
     send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
 
     //! temporary loop ask client 2 strings
