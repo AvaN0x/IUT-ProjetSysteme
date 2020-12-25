@@ -133,7 +133,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
     while (loop)
     {
         init_stream(&stream, STRING);
-        snprintf(string, BUFFER_SIZE, "*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
+        snprintf(string, BUFFER_SIZE, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
         set_content(&stream, string);
         serialize_stream(&stream, serStream);
         send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
@@ -160,6 +160,7 @@ void UserConnected(int communicationID, concertConfigStruct *concertConfig)
 
                 send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
                 break;
+
             case 1:
                 //! temporary loop ask client 2 strings
                 for (int i = 0; i < 2; i++)
