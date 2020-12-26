@@ -42,7 +42,7 @@ void dispSeats(bool *seats)
         else
             printf("  X ");
 
-        if ((i + 1) % squareroot == 0)
+        if ((i + 1) % squareroot == 0 || i == (SEAT_AMOUNT - 1))
             printf("\n");
     }
     printf("Choix : ");
