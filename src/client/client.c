@@ -55,6 +55,7 @@ void ConnectedToServer(int fdSocket)
     stream_t stream = create_stream(); // received stream
 
     char serStream[STREAM_SIZE]; // serialized stream
+    size_t serStreamSize;
     char string[BUFFER_SIZE];
     int8_t promptedInt;
     bool *seats;
@@ -75,9 +76,9 @@ void ConnectedToServer(int fdSocket)
                 init_stream(&stream, STRING);
                 promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);
-                serialize_stream(&stream, serStream);
+                serStreamSize = serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
+                send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
                 break;
 
             case STRING:
@@ -90,9 +91,9 @@ void ConnectedToServer(int fdSocket)
                 init_stream(&stream, STRING);
                 promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);
-                serialize_stream(&stream, serStream);
+                serStreamSize = serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
+                send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
 
                 break;
 
@@ -104,9 +105,9 @@ void ConnectedToServer(int fdSocket)
                 promptedInt = (int8_t)promptInt(string, BUFFER_SIZE, 0, *(int *)stream.content);
                 init_stream(&stream, INT);
                 set_content(&stream, &promptedInt);
-                serialize_stream(&stream, serStream);
+                serStreamSize = serialize_stream(&stream, serStream);
 
-                send(fdSocket, serStream, STREAM_SIZE, 0); // send buffer to server
+                send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
                 break;
 
             default:

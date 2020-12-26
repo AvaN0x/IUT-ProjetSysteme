@@ -98,6 +98,7 @@ void userConnected(int communicationID, concertConfigStruct *concertConfig)
 {
     stream_t stream = create_stream(); // stream that is used with this client
     char serStream[STREAM_SIZE];       // serialized stream
+    size_t serStreamSize;
     char string[BUFFER_SIZE];
     int8_t promptedInt, maxIntValue;
     bool loop = 1;
@@ -138,8 +139,8 @@ void userConnected(int communicationID, concertConfigStruct *concertConfig)
         init_stream(&stream, PROMPT_INT_WITH_MAX);
         maxIntValue = 2;
         set_content(&stream, &maxIntValue);
-        serialize_stream(&stream, serStream);
-        send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
+        serStreamSize = serialize_stream(&stream, serStream);
+        send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
@@ -155,9 +156,9 @@ void userConnected(int communicationID, concertConfigStruct *concertConfig)
                 init_stream(&stream, STRING);
                 snprintf(string, BUFFER_SIZE, "Passez une bonne journée, aurevoir !\n");
                 set_content(&stream, string);
-                serialize_stream(&stream, serStream);
+                serStreamSize = serialize_stream(&stream, serStream);
 
-                send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
+                send(communicationID, serStream, serStreamSize, 0); // send buffer to client
                 break;
 
             case 1:
@@ -167,9 +168,9 @@ void userConnected(int communicationID, concertConfigStruct *concertConfig)
                     init_stream(&stream, STRING_AND_PROMPT);
                     snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
                     set_content(&stream, string);
-                    serialize_stream(&stream, serStream);
+                    serStreamSize = serialize_stream(&stream, serStream);
 
-                    send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
+                    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 
                     int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
                     if (bufSize > 0)
@@ -216,6 +217,7 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
  */
 void sendString(int communicationID, stream_t *stream, char *string, char *serStream, const char *format, ...)
 {
+    size_t serStreamSize;
     init_stream(stream, STRING);
 
     va_list argptr;
@@ -225,6 +227,6 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
 
     set_content(stream, string);
 
-    serialize_stream(stream, serStream);
-    send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
+    serStreamSize = serialize_stream(stream, serStream);
+    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 }
