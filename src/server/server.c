@@ -152,13 +152,8 @@ void userConnected(int communicationID, concertConfigStruct *concertConfig)
             switch (*(int8_t *)stream.content)
             {
             case 0:
-                loop = 0;
-                init_stream(&stream, STRING);
-                snprintf(string, BUFFER_SIZE, "Passez une bonne journée, aurevoir !\n");
-                set_content(&stream, string);
-                serStreamSize = serialize_stream(&stream, serStream);
-
-                send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+                loop = 0; //? stop the loop, which will disconnect the user
+                sendString(communicationID, &stream, string, serStream, "Passez une bonne journée, aurevoir !\n");
                 break;
 
             case 1:
@@ -204,7 +199,7 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
     init_stream(s, END_CONNECTION);
     serialize_stream(s, serStream);
     send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
-    printf("%d | Client deconnected\n", communicationID);
+    printf("%d | Client disconnected\n", communicationID);
 }
 
 /**
