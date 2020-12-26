@@ -45,4 +45,5 @@ void dispSeats(bool *seats)
         if ((i + 1) % squareroot == 0)
             printf("\n");
     }
+    printf("Choix : ");
 }

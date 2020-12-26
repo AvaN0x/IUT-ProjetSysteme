@@ -1,6 +1,7 @@
 #ifndef DEF_SERVER
 #define DEF_SERVER
 
+#include <netinet/in.h>
 #include "concert.h"
 
 typedef struct

@@ -100,37 +100,8 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
     char serStream[STREAM_SIZE];       // serialized stream
     size_t serStreamSize;
     char string[BUFFER_SIZE];
-    int8_t promptedInt, maxIntValue;
+    int8_t maxIntValue;
     bool loop = 1;
-
-    // concertConfig->seats[communicationID].isOccupied = 1; //? just a test
-
-    // //! sending client the list of available seats
-    // init_stream(&stream, PROMPT_WANTED_SEAT);
-    // bool *seats = getSeatsStatus(concertConfig);
-    // set_content(&stream, seats);
-    // free(seats);
-    // serialize_stream(&stream, serStream);
-    // send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
-
-    // //! temporary loop ask client 2 strings
-    // for (int i = 0; i < 2; i++)
-    // {
-    //     init_stream(&stream, STRING_AND_PROMPT);
-    //     snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
-    //     set_content(&stream, string);
-    //     serialize_stream(&stream, serStream);
-
-    //     send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
-
-    //     int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-    //     if (bufSize > 0)
-    //     {
-    //         unserialize_stream(serStream, &stream);
-
-    //         printf("%d | Received : %s\n", communicationID, (char *)stream.content);
-    //     }
-    // }
 
     while (loop)
     {
@@ -149,37 +120,23 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
         {
             unserialize_stream(serStream, &stream);
 
-            switch (*(int8_t *)stream.content)
+            if (stream.type == INT)
             {
-            case 0:
-                loop = 0; //? stop the loop, which will disconnect the user
-                sendString(communicationID, &stream, string, serStream, "Passez une bonne journée, aurevoir !\n");
-                break;
-
-            case 1:
-                //! temporary loop ask client 2 strings
-                for (int i = 0; i < 2; i++)
+                int receivedInt = *(int8_t *)stream.content;
+                switch (receivedInt)
                 {
-                    init_stream(&stream, STRING_AND_PROMPT);
-                    snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
-                    set_content(&stream, string);
-                    serStreamSize = serialize_stream(&stream, serStream);
+                case 0:
+                    loop = 0; //? stop the loop, which will disconnect the user
+                    sendString(communicationID, &stream, string, serStream, "Passez une bonne journée, aurevoir !\n");
+                    break;
 
-                    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+                case 1:
+                    reserveTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
+                    break;
 
-                    int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                    if (bufSize > 0)
-                    {
-                        unserialize_stream(serStream, &stream);
-
-                        printf("%d | Received : %s\n", communicationID, (char *)stream.content);
-                    }
+                default:
+                    break;
                 }
-
-                break;
-
-            default:
-                break;
             }
         }
     }

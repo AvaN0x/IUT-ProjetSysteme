@@ -99,6 +99,12 @@ void ConnectedToServer(int fdSocket)
 
             case PROMPT_WANTED_SEAT:
                 dispSeats((bool *)stream.content);
+                promptedInt = (int8_t)promptInt(string, BUFFER_SIZE, 0, SEAT_AMOUNT);
+                init_stream(&stream, INT);
+                set_content(&stream, &promptedInt);
+                serStreamSize = serialize_stream(&stream, serStream);
+
+                send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
                 break;
 
             case PROMPT_INT_WITH_MAX:
