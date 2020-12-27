@@ -159,8 +159,8 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 void disconnectUser(int communicationID, stream_t *s, char *serStream)
 {
     init_stream(s, END_CONNECTION);
-    serialize_stream(s, serStream);
-    send(communicationID, serStream, STREAM_SIZE, 0); // send buffer to client
+    size_t serStreamSize = serialize_stream(s, serStream);
+    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
     printf("%d | Client disconnected\n", communicationID);
 }
 
@@ -175,7 +175,6 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
  */
 void sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldWait, const char *format, ...)
 {
-    size_t serStreamSize;
     init_stream(stream, shouldWait ? STRING_AND_WAIT : STRING);
 
     va_list argptr;
@@ -185,9 +184,22 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
 
     set_content(stream, string);
 
-    serStreamSize = serialize_stream(stream, serStream);
+    size_t serStreamSize = serialize_stream(stream, serStream);
     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 
     if (shouldWait)
         recv(communicationID, serStream, STREAM_SIZE, 0);
+}
+
+/**
+ * Prompt an user
+ * @param communicationID the id of the communication
+ * @param s the stream to send
+ * @param serStream the buffer that will contain the serialized stream
+ */
+void promptUser(int communicationID, stream_t *s, char *serStream)
+{
+    init_stream(s, PROMPT);
+    size_t serStreamSize = serialize_stream(s, serStream);
+    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 }

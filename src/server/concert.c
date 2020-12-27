@@ -85,37 +85,39 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             else
             {
                 printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
-                concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
 
-                // sendString(communicationID, stream, string, serStream, 1, "\nVeuillez entrer votre prénom : ");
+                concertConfig->seats[receivedInt - 1].isOccupied = 1;
 
-                // bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                // if (bufSize < 1)
-                // {
-                //     *parentLoop = 0;
-                //     loop = 0;
-                //     continue;
-                // }
-                // unserialize_stream(serStream, stream);
+                sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre prénom : ");
+                promptUser(communicationID, stream, serStream);
 
-                // printf("%d | Firstname : %s\n", communicationID, (char *)stream->content);
+                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                    continue;
+                }
+                unserialize_stream(serStream, stream);
+                memcpy(concertConfig->seats[receivedInt - 1].firstname, (char *)stream->content, strlen((char *)stream->content));
+                printf("%d | Firstname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].firstname);
 
-                // sendString(communicationID, stream, string, serStream, 1, "Veuillez entrer votre nom : ");
+                sendString(communicationID, stream, string, serStream, 0, "Veuillez entrer votre nom : ");
+                promptUser(communicationID, stream, serStream);
 
-                // bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                // if (bufSize < 1)
-                // {
-                //     *parentLoop = 0;
-                //     loop = 0;
-                //     continue;
-                // }
-                // unserialize_stream(serStream, stream);
+                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                    continue;
+                }
+                unserialize_stream(serStream, stream);
+                memcpy(concertConfig->seats[receivedInt - 1].lastname, (char *)stream->content, strlen((char *)stream->content));
+                printf("%d | Lastname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].lastname);
 
-                // printf("%d | Lastname : %s\n", communicationID, (char *)stream->content);
-
-                char code[CODE_LENGTH];
-                generateCode(code);
-                sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", code);
+                generateCode(concertConfig->seats[receivedInt - 1].code);
+                sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", concertConfig->seats[receivedInt - 1].code);
             }
         }
     }

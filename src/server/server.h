@@ -15,5 +15,6 @@ void *connectionThread(void *);
 void clientConnected(int, concertConfigStruct *);
 void disconnectUser(int, stream_t *, char *);
 void sendString(int, stream_t *, char *, char *, bool, const char *, ...);
+void promptUser(int, stream_t *, char *);
 
 #endif
