@@ -73,8 +73,8 @@ void ConnectedToServer(int fdSocket)
             switch (stream.type)
             {
             case PROMPT:
+                promptString(string, *(int *)stream.content);
                 init_stream(&stream, STRING);
-                promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);
                 serStreamSize = serialize_stream(&stream, serStream);
 

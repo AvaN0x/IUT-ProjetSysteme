@@ -201,10 +201,12 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
  * @param communicationID the id of the communication
  * @param s the stream to send
  * @param serStream the buffer that will contain the serialized stream
+ * @param length length of the string prompted
  */
-void promptUser(int communicationID, stream_t *s, char *serStream)
+void promptUser(int communicationID, stream_t *s, char *serStream, int length)
 {
     init_stream(s, PROMPT);
+    set_content(s, &length);
     size_t serStreamSize = serialize_stream(s, serStream);
     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 }

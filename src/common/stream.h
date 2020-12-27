@@ -16,13 +16,13 @@ typedef struct
 
 enum
 {
-    INT,
-    STRING,
-    STRING_AND_WAIT,
-    PROMPT,
-    PROMPT_INT_WITH_MAX,
-    PROMPT_WANTED_SEAT,
-    END_CONNECTION
+    INT,                 //? content : int
+    STRING,              //? content : string
+    STRING_AND_WAIT,     //? content : string
+    PROMPT,              //? content : int (size of the string prompted)
+    PROMPT_INT_WITH_MAX, //? content : int
+    PROMPT_WANTED_SEAT,  //? content : seats[]
+    END_CONNECTION       //? content : NULL
 };
 
 stream_t create_stream();

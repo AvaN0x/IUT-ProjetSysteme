@@ -93,7 +93,7 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 concertConfig->seats[receivedInt - 1].isOccupied = 1;
 
                 sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre prénom : ");
-                promptUser(communicationID, stream, serStream);
+                promptUser(communicationID, stream, serStream, NAME_SIZE);
 
                 bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
                 if (bufSize < 1)
@@ -107,7 +107,7 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 printf("%d | Firstname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].firstname);
 
                 sendString(communicationID, stream, string, serStream, 0, "Veuillez entrer votre nom : ");
-                promptUser(communicationID, stream, serStream);
+                promptUser(communicationID, stream, serStream, NAME_SIZE);
 
                 bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
                 if (bufSize < 1)

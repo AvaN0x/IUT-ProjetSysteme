@@ -42,14 +42,13 @@ void set_content(stream_t *s, void *content)
     size_t len;
     switch (s->type)
     {
-    case PROMPT:
     case END_CONNECTION:
         s->content = NULL;
         break;
 
+    case PROMPT:
     case INT:
     case PROMPT_INT_WITH_MAX:
-
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, content, 1);
         break;
@@ -96,10 +95,10 @@ size_t serialize_stream(stream_t *s, void *buffer)
     size_t len;
     switch (s->type)
     {
-    case PROMPT:
     case END_CONNECTION:
         return sizeof(uint8_t);
 
+    case PROMPT:
     case INT:
     case PROMPT_INT_WITH_MAX:
         memcpy(buffer, s->content, 1);
@@ -135,6 +134,7 @@ void unserialize_stream(void *buffer, stream_t *s)
     size_t len;
     switch (s->type)
     {
+    case PROMPT:
     case INT:
     case PROMPT_INT_WITH_MAX:
         s->content = malloc(sizeof(int8_t));
