@@ -91,8 +91,13 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             sem_wait(&semaphore);
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
             {
-                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
                 sem_post(&semaphore);
+                bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                }
                 continue;
             }
             sem_post(&semaphore);
@@ -129,7 +134,12 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
             {
                 sem_post(&semaphore);
-                sendString(communicationID, stream, string, serStream, 1, "\n=> Quelqu'un vient de réserver ce siège plus rapidement que vous, veuillez en séléctionner un autre.\n");
+                bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Quelqu'un vient de réserver ce siège plus rapidement que vous, veuillez en séléctionner un autre.\n");
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                }
                 continue;
             }
             //? if the seat is still available, we set all new values
@@ -142,7 +152,13 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
 
             sem_post(&semaphore);
 
-            sendString(communicationID, stream, string, serStream, 1, "\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, code);
+            bufSize = sendString(communicationID, stream, string, serStream, 1, "\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, code);
+            if (bufSize < 1)
+            {
+                *parentLoop = 0;
+                loop = 0;
+                continue;
+            }
         }
     }
 }

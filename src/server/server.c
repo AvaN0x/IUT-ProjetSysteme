@@ -177,8 +177,9 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
  * @param serStream the buffer that will contain the serialized stream
  * @param shouldWait should ask the client to press enter to continue
  * @param format the formated string
+ * @return result of recv to check if client disconnected
  */
-void sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldWait, const char *format, ...)
+int sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldWait, const char *format, ...)
 {
     init_stream(stream, shouldWait ? STRING_AND_WAIT : STRING);
 
@@ -193,8 +194,9 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 
     if (shouldWait)
-        // TODO crash server is client disconnect at this moment
-        recv(communicationID, serStream, STREAM_SIZE, 0);
+        return recv(communicationID, serStream, STREAM_SIZE, 0);
+    else
+        return 1;
 }
 
 /**
