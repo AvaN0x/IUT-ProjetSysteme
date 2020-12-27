@@ -84,19 +84,21 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 continue;
             }
 
+            char firstname[NAME_SIZE];
+            char lastname[NAME_SIZE];
+            char code[CODE_LENGTH];
+
+            sem_wait(&semaphore);
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
             {
                 sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
+                sem_post(&semaphore);
                 continue;
             }
-
-            printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
-
-            concertConfig->seats[receivedInt - 1].isOccupied = 1;
+            sem_post(&semaphore);
 
             sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre prénom : ");
             promptUser(communicationID, stream, serStream, NAME_SIZE);
-
             bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
             if (bufSize < 1)
             {
@@ -105,12 +107,10 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 continue;
             }
             unserialize_stream(serStream, stream);
-            memcpy(concertConfig->seats[receivedInt - 1].firstname, (char *)stream->content, strlen((char *)stream->content));
-            printf("%d | Firstname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].firstname);
+            memcpy(firstname, (char *)stream->content, strlen((char *)stream->content) + 1);
 
             sendString(communicationID, stream, string, serStream, 0, "Veuillez entrer votre nom : ");
             promptUser(communicationID, stream, serStream, NAME_SIZE);
-
             bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
             if (bufSize < 1)
             {
@@ -119,11 +119,32 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 continue;
             }
             unserialize_stream(serStream, stream);
-            memcpy(concertConfig->seats[receivedInt - 1].lastname, (char *)stream->content, strlen((char *)stream->content));
-            printf("%d | Lastname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].lastname);
+            memcpy(lastname, (char *)stream->content, strlen((char *)stream->content) + 1);
 
-            generateCode(concertConfig->seats[receivedInt - 1].code);
-            sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", concertConfig->seats[receivedInt - 1].code);
+            // todo confirmation of reservation
+
+            // we generate the code for the reservation
+            generateCode(code);
+
+            sem_wait(&semaphore);
+            //? check if the seat is still available
+            if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
+            {
+                sem_post(&semaphore);
+                sendString(communicationID, stream, string, serStream, 1, "\n=> Quelqu'un vient de réserver ce siège plus rapidement que vous, veuillez en séléctionner un autre.\n");
+                continue;
+            }
+            //? if the seat is still available, we set all new values
+            printf("%d | Seat %d reserved by %s %s (code : %s)\n", communicationID, receivedInt, firstname, lastname, code);
+
+            concertConfig->seats[receivedInt - 1].isOccupied = 1;
+            memcpy(concertConfig->seats[receivedInt - 1].firstname, firstname, strlen(firstname));
+            memcpy(concertConfig->seats[receivedInt - 1].lastname, lastname, strlen(lastname));
+            memcpy(concertConfig->seats[receivedInt - 1].code, code, CODE_LENGTH);
+
+            sem_post(&semaphore);
+
+            sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", code);
         }
     }
 }
