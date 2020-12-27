@@ -59,6 +59,7 @@ void set_content(stream_t *s, void *content)
         len = strlen((char *)content);
         s->content = malloc(len * sizeof(char));
         memcpy(s->content, content, len);
+        ((char *)s->content)[len] = '\0';
         break;
 
     case PROMPT_WANTED_SEAT:
