@@ -47,3 +47,26 @@ void dispSeats(bool *seats)
     }
     printf("Choix : ");
 }
+
+/**
+ * Generate a code for a buffer
+ * @param code the buffer that will contain the code string
+ */
+void generateCode(char *code)
+{
+    for (int i = 0; i < CODE_LENGTH; i++)
+    {
+        code[i] = randomInt(48, 57);
+    }
+    code[CODE_LENGTH] = '\0';
+}
+
+/**
+ * Generate a random int inside of an interval
+ * @param min interval min for the int
+ * @param max interval max for the int
+ */
+int randomInt(int min, int max)
+{
+    return rand() % (max - min + 1) + min;
+}

@@ -87,31 +87,35 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
                 concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
 
-                sendString(communicationID, stream, string, serStream, 1, "\nVeuillez entrer votre prénom : ");
+                // sendString(communicationID, stream, string, serStream, 1, "\nVeuillez entrer votre prénom : ");
 
-                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                if (bufSize < 1)
-                {
-                    *parentLoop = 0;
-                    loop = 0;
-                    continue;
-                }
-                unserialize_stream(serStream, stream);
+                // bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                // if (bufSize < 1)
+                // {
+                //     *parentLoop = 0;
+                //     loop = 0;
+                //     continue;
+                // }
+                // unserialize_stream(serStream, stream);
 
-                printf("%d | Firstname : %s\n", communicationID, (char *)stream->content);
+                // printf("%d | Firstname : %s\n", communicationID, (char *)stream->content);
 
-                sendString(communicationID, stream, string, serStream, 1, "Veuillez entrer votre nom : ");
+                // sendString(communicationID, stream, string, serStream, 1, "Veuillez entrer votre nom : ");
 
-                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                if (bufSize < 1)
-                {
-                    *parentLoop = 0;
-                    loop = 0;
-                    continue;
-                }
-                unserialize_stream(serStream, stream);
+                // bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                // if (bufSize < 1)
+                // {
+                //     *parentLoop = 0;
+                //     loop = 0;
+                //     continue;
+                // }
+                // unserialize_stream(serStream, stream);
 
-                printf("%d | Lastname : %s\n", communicationID, (char *)stream->content);
+                // printf("%d | Lastname : %s\n", communicationID, (char *)stream->content);
+
+                char code[CODE_LENGTH];
+                generateCode(code);
+                sendString(communicationID, stream, string, serStream, 0, "Voici votre code (à conserver) : %s\n", code);
             }
         }
     }
