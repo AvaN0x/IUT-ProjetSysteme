@@ -10,9 +10,9 @@
 typedef struct
 {
     bool isOccupied;
-    char firstname[NAME_SIZE];
-    char lastname[NAME_SIZE];
-    char code[CODE_LENGTH]; // todo compare string with this to check if the user prompted the good code
+    char firstname[NAME_SIZE + 1];
+    char lastname[NAME_SIZE + 1];
+    char code[CODE_LENGTH + 1]; // todo compare string with this to check if the user prompted the good code (int strcmp( const char * first, const char * second );)
 } seatStruct;
 
 seatStruct initSeat();

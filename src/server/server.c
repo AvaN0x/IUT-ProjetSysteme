@@ -193,6 +193,7 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
 
     if (shouldWait)
+        // TODO crash server is client disconnect at this moment
         recv(communicationID, serStream, STREAM_SIZE, 0);
 }
 

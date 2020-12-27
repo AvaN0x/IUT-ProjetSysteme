@@ -84,9 +84,9 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 continue;
             }
 
-            char firstname[NAME_SIZE];
-            char lastname[NAME_SIZE];
-            char code[CODE_LENGTH];
+            char firstname[NAME_SIZE + 1];
+            char lastname[NAME_SIZE + 1];
+            char code[CODE_LENGTH + 1];
 
             sem_wait(&semaphore);
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
@@ -121,8 +121,6 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             unserialize_stream(serStream, stream);
             memcpy(lastname, (char *)stream->content, strlen((char *)stream->content) + 1);
 
-            // todo confirmation of reservation
-
             // we generate the code for the reservation
             generateCode(code);
 
@@ -135,16 +133,16 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 continue;
             }
             //? if the seat is still available, we set all new values
-            printf("%d | Seat %d reserved by %s %s (code : %s)\n", communicationID, receivedInt, firstname, lastname, code);
+            printf("%d | Seat %d reserved by : %s %s (code : %s)\n", communicationID, receivedInt, firstname, lastname, code);
 
             concertConfig->seats[receivedInt - 1].isOccupied = 1;
-            memcpy(concertConfig->seats[receivedInt - 1].firstname, firstname, strlen(firstname));
-            memcpy(concertConfig->seats[receivedInt - 1].lastname, lastname, strlen(lastname));
-            memcpy(concertConfig->seats[receivedInt - 1].code, code, CODE_LENGTH);
+            memcpy(concertConfig->seats[receivedInt - 1].firstname, firstname, strlen(firstname) + 1);
+            memcpy(concertConfig->seats[receivedInt - 1].lastname, lastname, strlen(lastname) + 1);
+            memcpy(concertConfig->seats[receivedInt - 1].code, code, CODE_LENGTH + 1);
 
             sem_post(&semaphore);
 
-            sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", code);
+            sendString(communicationID, stream, string, serStream, 1, "\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, code);
         }
     }
 }
