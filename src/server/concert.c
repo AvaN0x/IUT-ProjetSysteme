@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include "semaphore.h"
 #include "concert.h"
 #include "server.h"
 #include "../common/seats.h"
@@ -31,10 +32,13 @@ concertConfigStruct initConcert()
 bool *getSeatsStatus(concertConfigStruct *config)
 {
     bool *seats = malloc(SEAT_AMOUNT * sizeof(bool));
+
+    sem_wait(&semaphore);
     for (int i = 0; i < SEAT_AMOUNT; i++)
     {
         seats[i] = config->seats[i].isOccupied;
     }
+    sem_post(&semaphore);
 
     return seats;
 }

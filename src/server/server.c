@@ -11,8 +11,11 @@
 #include <stdarg.h> // for infinite parameters
 #include <time.h>   // for random functions
 
+#include "semaphore.h"
 #include "../common/stream.h"
 #include "server.h"
+
+sem_t semaphore;
 
 /**
  * Main function that create the socket, create the concert, and manage client connections
@@ -47,6 +50,7 @@ int main()
 
     //? init the concert structure that will contain every seats
     concertConfigStruct concertConfig = initConcert();
+    sem_init(&semaphore, PTHREAD_PROCESS_SHARED, 1);
 
     //? set the randomness of the program
     srand((unsigned int)time(NULL));
@@ -73,6 +77,7 @@ int main()
         }
     }
     close(serverSocket);
+    sem_destroy(&semaphore);
 
     return EXIT_SUCCESS;
 }
