@@ -81,7 +81,7 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             }
 
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
-                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre. \n(Appuyez sur une touche pour passer à la suite)\n");
+                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre. \n");
             else
             {
                 printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
@@ -115,7 +115,7 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
 
                 char code[CODE_LENGTH];
                 generateCode(code);
-                sendString(communicationID, stream, string, serStream, 0, "Voici votre code (à conserver) : %s\n", code);
+                sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", code);
             }
         }
     }

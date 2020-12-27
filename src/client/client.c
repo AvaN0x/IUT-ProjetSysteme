@@ -85,9 +85,8 @@ void ConnectedToServer(int fdSocket)
                 printf("%s", (char *)stream.content);
                 break;
 
-            case STRING_AND_PROMPT:
-                printf("%s", (char *)stream.content);
-
+            case STRING_AND_WAIT:
+                printf("%s(Appuyez sur entrer pour continuer)\n", (char *)stream.content);
                 init_stream(&stream, STRING);
                 promptString(string, BUFFER_SIZE);
                 set_content(&stream, string);

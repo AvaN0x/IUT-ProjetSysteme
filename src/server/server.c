@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <stdarg.h> // for infinite parameters
+#include <time.h>   // for random functions
 
 #include "../common/stream.h"
 #include "server.h"
@@ -46,6 +47,9 @@ int main()
 
     //? init the concert structure that will contain every seats
     concertConfigStruct concertConfig = initConcert();
+
+    //? set the randomness of the program
+    srand((unsigned int)time(NULL));
 
     // Main loop
     int sockaddr_in_size = sizeof(struct sockaddr_in);
@@ -105,7 +109,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
     while (loop)
     {
-        sendString(communicationID, &stream, string, serStream, 0, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
+        sendString(communicationID, &stream, string, serStream, 0, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\nChoix : ");
 
         init_stream(&stream, PROMPT_INT_WITH_MAX);
         maxIntValue = 2;
@@ -166,12 +170,13 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
  * @param stream the stream to send
  * @param string the buffer that contain the string
  * @param serStream the buffer that will contain the serialized stream
+ * @param shouldWait should ask the client to press enter to continue
  * @param format the formated string
  */
-void sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldPrompt, const char *format, ...)
+void sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldWait, const char *format, ...)
 {
     size_t serStreamSize;
-    init_stream(stream, shouldPrompt ? STRING_AND_PROMPT : STRING);
+    init_stream(stream, shouldWait ? STRING_AND_WAIT : STRING);
 
     va_list argptr;
     va_start(argptr, format);
@@ -182,4 +187,7 @@ void sendString(int communicationID, stream_t *stream, char *string, char *serSt
 
     serStreamSize = serialize_stream(stream, serStream);
     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+
+    if (shouldWait)
+        recv(communicationID, serStream, STREAM_SIZE, 0);
 }

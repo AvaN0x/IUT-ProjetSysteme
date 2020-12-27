@@ -55,7 +55,7 @@ void set_content(stream_t *s, void *content)
         break;
 
     case STRING:
-    case STRING_AND_PROMPT:
+    case STRING_AND_WAIT:
         len = strlen((char *)content);
         s->content = malloc(len * sizeof(char));
         memcpy(s->content, content, len);
@@ -106,7 +106,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
         return sizeof(uint8_t) + sizeof(uint8_t);
 
     case STRING:
-    case STRING_AND_PROMPT:
+    case STRING_AND_WAIT:
         len = strlen((char *)s->content);
         *((uint64_t *)buffer) = len;
         buffer += sizeof(uint64_t);
@@ -142,7 +142,7 @@ void unserialize_stream(void *buffer, stream_t *s)
         break;
 
     case STRING:
-    case STRING_AND_PROMPT:
+    case STRING_AND_WAIT:
         len = *((uint64_t *)buffer);
         buffer += sizeof(uint64_t);
         s->content = malloc((len + 1) * sizeof(char));
