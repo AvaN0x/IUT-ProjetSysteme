@@ -87,20 +87,31 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                 printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
                 concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
 
-                // init_stream(&stream, STRING_AND_PROMPT);
-                // snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
-                // set_content(&stream, string);
-                // serialize_stream(&stream, serStream);
+                sendString(communicationID, stream, string, serStream, 1, "\nVeuillez entrer votre prénom : ");
 
-                // send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
-                // send(communicationID, serStream, STREAM_SIZE, 0);       // send buffer to client
+                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                    continue;
+                }
+                unserialize_stream(serStream, stream);
 
-                // int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                // if (bufSize > 0)
-                // {
-                //     unserialize_stream(serStream, &stream);
-                //     printf("%d | Received : %s\n", communicationID, (char *)stream.content);
-                // }
+                printf("%d | Firstname : %s\n", communicationID, (char *)stream->content);
+
+                sendString(communicationID, stream, string, serStream, 1, "Veuillez entrer votre nom : ");
+
+                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                if (bufSize < 1)
+                {
+                    *parentLoop = 0;
+                    loop = 0;
+                    continue;
+                }
+                unserialize_stream(serStream, stream);
+
+                printf("%d | Lastname : %s\n", communicationID, (char *)stream->content);
             }
         }
     }
