@@ -79,8 +79,14 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
                     loop = 0;
                 else
                 {
-                    printf("%d | Seat asked  : %d\n", communicationID, receivedInt);
-                    concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
+                    if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
+                        // todo maybe use STRING_AND_PROMPT to make the user confirm that he have seen the message
+                        sendString(communicationID, stream, string, serStream, "=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
+                    else
+                    {
+                        printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
+                        concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
+                    }
                 }
             }
         }
