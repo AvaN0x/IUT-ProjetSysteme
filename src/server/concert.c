@@ -85,44 +85,45 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             }
 
             if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
-                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre. \n");
-            else
             {
-                printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
-
-                concertConfig->seats[receivedInt - 1].isOccupied = 1;
-
-                sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre prénom : ");
-                promptUser(communicationID, stream, serStream, NAME_SIZE);
-
-                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                if (bufSize < 1)
-                {
-                    *parentLoop = 0;
-                    loop = 0;
-                    continue;
-                }
-                unserialize_stream(serStream, stream);
-                memcpy(concertConfig->seats[receivedInt - 1].firstname, (char *)stream->content, strlen((char *)stream->content));
-                printf("%d | Firstname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].firstname);
-
-                sendString(communicationID, stream, string, serStream, 0, "Veuillez entrer votre nom : ");
-                promptUser(communicationID, stream, serStream, NAME_SIZE);
-
-                bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
-                if (bufSize < 1)
-                {
-                    *parentLoop = 0;
-                    loop = 0;
-                    continue;
-                }
-                unserialize_stream(serStream, stream);
-                memcpy(concertConfig->seats[receivedInt - 1].lastname, (char *)stream->content, strlen((char *)stream->content));
-                printf("%d | Lastname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].lastname);
-
-                generateCode(concertConfig->seats[receivedInt - 1].code);
-                sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", concertConfig->seats[receivedInt - 1].code);
+                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
+                continue;
             }
+
+            printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
+
+            concertConfig->seats[receivedInt - 1].isOccupied = 1;
+
+            sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre prénom : ");
+            promptUser(communicationID, stream, serStream, NAME_SIZE);
+
+            bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+            if (bufSize < 1)
+            {
+                *parentLoop = 0;
+                loop = 0;
+                continue;
+            }
+            unserialize_stream(serStream, stream);
+            memcpy(concertConfig->seats[receivedInt - 1].firstname, (char *)stream->content, strlen((char *)stream->content));
+            printf("%d | Firstname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].firstname);
+
+            sendString(communicationID, stream, string, serStream, 0, "Veuillez entrer votre nom : ");
+            promptUser(communicationID, stream, serStream, NAME_SIZE);
+
+            bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+            if (bufSize < 1)
+            {
+                *parentLoop = 0;
+                loop = 0;
+                continue;
+            }
+            unserialize_stream(serStream, stream);
+            memcpy(concertConfig->seats[receivedInt - 1].lastname, (char *)stream->content, strlen((char *)stream->content));
+            printf("%d | Lastname : %s\n", communicationID, concertConfig->seats[receivedInt - 1].lastname);
+
+            generateCode(concertConfig->seats[receivedInt - 1].code);
+            sendString(communicationID, stream, string, serStream, 1, "Voici votre code (à conserver) : %s\n", concertConfig->seats[receivedInt - 1].code);
         }
     }
 }

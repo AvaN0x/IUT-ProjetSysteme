@@ -18,17 +18,6 @@ seatStruct initSeat()
 }
 
 /**
- * Check whether a seat is occupied or not
- * @param seat the seat
- * @param buffer the buffer to fill in
- * @return true if the seat is occupied, else false
- */
-bool seatIsOccupied(seatStruct *seat)
-{
-    return seat->isOccupied;
-}
-
-/**
  * Display a table of seats
  * @param seats the array (bool[]) of seats
  */
