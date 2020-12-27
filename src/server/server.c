@@ -105,7 +105,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
     while (loop)
     {
-        sendString(communicationID, &stream, string, serStream, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
+        sendString(communicationID, &stream, string, serStream, 0, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket (temporary ask for two string)\n2/ Annuler un ticket\nChoix : ");
 
         init_stream(&stream, PROMPT_INT_WITH_MAX);
         maxIntValue = 2;
@@ -115,28 +115,29 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
-            loop = 0;
-        else
         {
-            unserialize_stream(serStream, &stream);
+            loop = 0;
+            continue;
+        }
 
-            if (stream.type == INT)
+        unserialize_stream(serStream, &stream);
+
+        if (stream.type == INT)
+        {
+            int receivedInt = *(int8_t *)stream.content;
+            switch (receivedInt)
             {
-                int receivedInt = *(int8_t *)stream.content;
-                switch (receivedInt)
-                {
-                case 0:
-                    loop = 0; //? stop the loop, which will disconnect the user
-                    sendString(communicationID, &stream, string, serStream, "Passez une bonne journée, aurevoir !\n");
-                    break;
+            case 0:
+                loop = 0; //? stop the loop, which will disconnect the user
+                sendString(communicationID, &stream, string, serStream, 0, "Passez une bonne journée, aurevoir !\n");
+                break;
 
-                case 1:
-                    reserveTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
-                    break;
+            case 1:
+                reserveTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
+                break;
 
-                default:
-                    break;
-                }
+            default:
+                break;
             }
         }
     }
@@ -167,10 +168,10 @@ void disconnectUser(int communicationID, stream_t *s, char *serStream)
  * @param serStream the buffer that will contain the serialized stream
  * @param format the formated string
  */
-void sendString(int communicationID, stream_t *stream, char *string, char *serStream, const char *format, ...)
+void sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldPrompt, const char *format, ...)
 {
     size_t serStreamSize;
-    init_stream(stream, STRING);
+    init_stream(stream, shouldPrompt ? STRING_AND_PROMPT : STRING);
 
     va_list argptr;
     va_start(argptr, format);

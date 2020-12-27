@@ -53,7 +53,7 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
     bool loop = 1;
     while (loop)
     {
-        sendString(communicationID, stream, string, serStream, "\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n0/ Quitter\n");
+        sendString(communicationID, stream, string, serStream, 0, "\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n0/ Quitter\n");
 
         init_stream(stream, PROMPT_WANTED_SEAT);
         bool *seats = getSeatsStatus(concertConfig);
@@ -67,27 +67,40 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
         {
             *parentLoop = 0;
             loop = 0;
+            continue;
         }
-        else
-        {
-            unserialize_stream(serStream, stream);
+        unserialize_stream(serStream, stream);
 
-            if (stream->type == INT)
+        if (stream->type == INT)
+        {
+            int receivedInt = *(int8_t *)stream->content;
+            if (receivedInt == 0)
             {
-                int receivedInt = *(int8_t *)stream->content;
-                if (receivedInt == 0)
-                    loop = 0;
-                else
-                {
-                    if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
-                        // todo maybe use STRING_AND_PROMPT to make the user confirm that he have seen the message
-                        sendString(communicationID, stream, string, serStream, "=> Ce siège est déjà réservé, veuillez en séléctionner un autre.\n");
-                    else
-                    {
-                        printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
-                        concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
-                    }
-                }
+                loop = 0;
+                continue;
+            }
+
+            if (concertConfig->seats[receivedInt - 1].isOccupied == 1)
+                sendString(communicationID, stream, string, serStream, 1, "\n=> Ce siège est déjà réservé, veuillez en séléctionner un autre. \n(Appuyez sur une touche pour passer à la suite)\n");
+            else
+            {
+                printf("%d | Seat reserved  : %d\n", communicationID, receivedInt);
+                concertConfig->seats[receivedInt - 1].isOccupied = 1; //? just a test
+
+                // init_stream(&stream, STRING_AND_PROMPT);
+                // snprintf(string, BUFFER_SIZE, "Send me something please (%d) : ", i);
+                // set_content(&stream, string);
+                // serialize_stream(&stream, serStream);
+
+                // send(communicationID, serStream, sizeof(serStream), 0); // send buffer to client
+                // send(communicationID, serStream, STREAM_SIZE, 0);       // send buffer to client
+
+                // int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+                // if (bufSize > 0)
+                // {
+                //     unserialize_stream(serStream, &stream);
+                //     printf("%d | Received : %s\n", communicationID, (char *)stream.content);
+                // }
             }
         }
     }
