@@ -247,7 +247,7 @@ void cancelTicket(bool *parentLoop, int communicationID, concertConfigStruct *co
         sem_post(&semaphore);
 
         printf("%d | Seat %d reservation canceled (name : %s, code : %s)\n", communicationID, seatIndex + 1, lastname, code);
-        bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Le siège numéro %d est à nouveau disponible.\n", seatIndex + 1);
+        bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Votre réservation du siège numéro %d est annulée.\n", seatIndex + 1);
         if (bufSize < 1)
         {
             *parentLoop = 0;
