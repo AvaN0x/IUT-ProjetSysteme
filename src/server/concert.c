@@ -175,11 +175,12 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
 
             sem_post(&semaphore);
 
+            loop = 0;
+
             bufSize = sendString(communicationID, stream, string, serStream, 1, "\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, code);
             if (bufSize < 1)
             {
                 *parentLoop = 0;
-                loop = 0;
                 continue;
             }
         }
