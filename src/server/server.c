@@ -145,6 +145,10 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                 reserveTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
                 break;
 
+            case 2:
+                cancelTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
+                break;
+
             default:
                 break;
             }

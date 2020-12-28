@@ -185,3 +185,71 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
         }
     }
 }
+
+/**
+ * Function that manage when the user want to reserve a ticket
+ * @param parentLoop the main loop state to stop connection if user leave
+ * @param communicationID the id of the communication
+ * @param stream the stream to send
+ * @param string the buffer that contain the string
+ * @param serStream the buffer that will contain the serialized stream
+ */
+void cancelTicket(bool *parentLoop, int communicationID, concertConfigStruct *concertConfig, stream_t *stream, char *string, char *serStream)
+{
+    size_t serStreamSize;
+    char lastname[NAME_SIZE + 1];
+    char code[CODE_LENGTH + 1];
+
+    sendString(communicationID, stream, string, serStream, 0, "\n*------- ANNULATION TICKET -------*\nVeuillez entrer votre nom : ");
+    promptUser(communicationID, stream, serStream, NAME_SIZE + 1);
+    int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+    if (bufSize < 1)
+    {
+        *parentLoop = 0;
+        return;
+    }
+    unserialize_stream(serStream, stream);
+    memcpy(lastname, (char *)stream->content, strlen((char *)stream->content) + 1);
+
+    sendString(communicationID, stream, string, serStream, 0, "\nVeuillez entrer votre numéro de dossier : ");
+    promptUser(communicationID, stream, serStream, CODE_LENGTH + 1);
+    bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
+    if (bufSize < 1)
+    {
+        *parentLoop = 0;
+        return;
+    }
+    unserialize_stream(serStream, stream);
+    memcpy(code, (char *)stream->content, strlen((char *)stream->content) + 1);
+
+    int seatIndex = getIndexWhenCode(concertConfig, code);
+    sem_wait(&semaphore);
+    if (seatIndex == -1 || strcmp(concertConfig->seats[seatIndex].lastname, lastname) != 0)
+    {
+        sem_post(&semaphore);
+
+        bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Les informations saisient ne correspondant à aucunes places.\n");
+        if (bufSize < 1)
+        {
+            *parentLoop = 0;
+        }
+    }
+    else
+    {
+        sem_post(&semaphore);
+        // todo confirmation (maybe add a stream type that return an int)
+        sem_wait(&semaphore);
+        concertConfig->seats[seatIndex].isOccupied = 0;
+        concertConfig->seats[seatIndex].firstname[0] = '\0';
+        concertConfig->seats[seatIndex].lastname[0] = '\0';
+        concertConfig->seats[seatIndex].code[0] = '\0';
+        sem_post(&semaphore);
+
+        printf("%d | Seat %d reservation canceled (name : %s, code : %s)\n", communicationID, seatIndex + 1, lastname, code);
+        bufSize = sendString(communicationID, stream, string, serStream, 1, "\n=> Le siège numéro %d est à nouveau disponible.\n", seatIndex + 1);
+        if (bufSize < 1)
+        {
+            *parentLoop = 0;
+        }
+    }
+}
