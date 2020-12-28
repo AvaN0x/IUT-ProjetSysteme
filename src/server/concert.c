@@ -44,6 +44,26 @@ bool *getSeatsStatus(concertConfigStruct *config)
 }
 
 /**
+ * Return the index or -1 of the seat that have a specified code
+ * @param config the concert configuration
+ * @param code the code that is searched
+ * @return the index
+ */
+int16_t getIndexWhenCode(concertConfigStruct *config, char *code)
+{
+    sem_wait(&semaphore);
+    for (int i = 0; i < SEAT_AMOUNT; i++)
+        if (config->seats[i].isOccupied == 1 && strcmp(config->seats[i].code, code) == 0)
+        {
+            sem_post(&semaphore);
+            return i;
+        }
+    sem_post(&semaphore);
+
+    return -1;
+}
+
+/**
  * Function that manage when the user want to reserve a ticket
  * @param parentLoop the main loop state to stop connection if user leave
  * @param communicationID the id of the communication
