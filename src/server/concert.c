@@ -147,7 +147,10 @@ void reserveTicket(bool *parentLoop, int communicationID, concertConfigStruct *c
             memcpy(lastname, (char *)stream->content, strlen((char *)stream->content) + 1);
 
             // we generate the code for the reservation
-            generateCode(code);
+            do
+            {
+                generateCode(code);
+            } while (getIndexWhenCode(concertConfig, code) != -1);
 
             sem_wait(&semaphore);
             //? check if the seat is still available
