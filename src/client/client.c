@@ -42,45 +42,45 @@ int main()
     printf("Connected to %s:%d\n", ADDRESS, PORT);
 
     // call the function that manage the connection
-    ConnectedToServer(fdSocket);
+    connectedToServer(fdSocket);
 
     close(fdSocket);
     return EXIT_SUCCESS;
 }
 
 /**
- * Function that manage the user connection
+ * Function that manage the client connection
  * @param fdSocket the socket of the communication
  */
-void ConnectedToServer(int fdSocket)
+void connectedToServer(int fdSocket)
 {
     stream_t stream = create_stream(); // received stream
 
     size_t serStreamSize;        // variable that will contain the size of setStream
     char serStream[STREAM_SIZE]; // serialized stream
     char string[BUFFER_SIZE];    // buffer for strings
-    int8_t promptedInt;          // integer that is used when an integer is prompted to the user
+    int8_t promptedInt;          // integer that is used when an integer is prompted to the client
     bool *seats;                 // array that will contain all seat values
-    bool loop = 1;               // loop that let the user do something until he leave
+    bool loop = 1;               // loop that let the client do something until he leave
 
     do
     {
         printf("\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\nChoix : ");
-        promptedInt = promptInt(string, BUFFER_SIZE, 0, 2); // prompt the user an int (choice)
+        promptedInt = promptInt(string, BUFFER_SIZE, 0, 2); // prompt the client an int (choice)
 
         switch (promptedInt)
         {
         case 0:
-            loop = 0;                             // set the loop at false, will disconnect the user
-            init_stream(&stream, END_CONNECTION); // tell the server that this user left
+            loop = 0;                             // set the loop at false, will disconnect the client
+            init_stream(&stream, END_CONNECTION); // tell the server that this client left
             serStreamSize = serialize_stream(&stream, serStream);
             send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
             break;
         case 1:
-            reserveTicket(fdSocket, &stream, string, serStream); // enter in the function that allow the user to reserve a ticket
+            reserveTicket(fdSocket, &stream, string, serStream); // enter in the function that allow the client to reserve a ticket
             break;
         case 2:
-            cancelTicket(fdSocket, &stream, string, serStream); // enter in the function that allow the user to cancel a ticket
+            cancelTicket(fdSocket, &stream, string, serStream); // enter in the function that allow the client to cancel a ticket
             break;
         }
     } while (loop == 1);
@@ -95,7 +95,7 @@ void ConnectedToServer(int fdSocket)
 }
 
 /**
- * Function that manage when the user want to reserve a ticket
+ * Function that manage when the client want to reserve a ticket
  * @param communicationID the id of the communication
  * @param stream the stream to send
  * @param string the buffer that contain the string
@@ -105,7 +105,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
 {
     size_t serStreamSize; // variable that will contain the size of setStream
     int bufSize;          // contain the return of recv()
-    bool loop = 1;        // loop to let the user select a seat until he/she find one that is not already reserved
+    bool loop = 1;        // loop to let the client select a seat until he/she find one that is not already reserved
     int weantedSeat;
 
     do
@@ -117,7 +117,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         bufSize = recv(fdSocket, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
         {
-            loop = 0; // set the loop at false, this will make the user go back to the lobby
+            loop = 0; // set the loop at false, this will make the client go back to the lobby
             continue; // go to the next iteration of this while loop
         }
         unserialize_stream(serStream, stream);
@@ -127,7 +127,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         weantedSeat = promptInt(string, BUFFER_SIZE, 0, SEAT_AMOUNT);
         if (weantedSeat == 0)
         {
-            loop = 0; // set the loop at false, this will make the user go back to the lobby
+            loop = 0; // set the loop at false, this will make the client go back to the lobby
             continue; // go to the next iteration of this while loop
         }
 
@@ -139,7 +139,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         bufSize = recv(fdSocket, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
         {
-            loop = 0; // set the loop at false, this will make the user go back to the lobby
+            loop = 0; // set the loop at false, this will make the client go back to the lobby
             continue; // go to the next iteration of this while loop
         }
         unserialize_stream(serStream, stream);
@@ -177,13 +177,13 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         bufSize = recv(fdSocket, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
         {
-            loop = 0; // set the loop at false, this will make the user go back to the lobby
+            loop = 0; // set the loop at false, this will make the client go back to the lobby
             continue; // go to the next iteration of this while loop
         }
         unserialize_stream(serStream, stream);
 
         // check the answer of the server
-        if (stream->type == ERROR) // ERROR if the seat got reserved from someone else while the user where sending datas
+        if (stream->type == ERROR) // ERROR if the seat got reserved from someone else while the client where sending datas
         {
             printf("\n=> Quelqu'un vient de réserver ce siège plus rapidement que vous, veuillez en séléctionner un autre.\n(Appuyez sur entrer pour continuer)\n");
             promptString(string, BUFFER_SIZE);
@@ -194,13 +194,13 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
             printf("\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, (char *)stream->content);
             printf("(Appuyez sur entrer pour continuer)\n");
             promptString(string, BUFFER_SIZE);
-            loop = 0; // set the loop at false, this will make the user go back to the lobby
+            loop = 0; // set the loop at false, this will make the client go back to the lobby
         }
     } while (loop == 1);
 }
 
 /**
- * Function that manage when the user want to reserve a ticket
+ * Function that manage when the client want to reserve a ticket
  * @param communicationID the id of the communication
  * @param stream the stream to send
  * @param string the buffer that contain the string
@@ -283,7 +283,7 @@ int promptString(char *buffer, int length)
 }
 
 /**
- * Ask user to confirm a choice
+ * Ask client to confirm a choice
  * @param format the formated string to display
  * @return bool
  */
@@ -317,7 +317,7 @@ int promptConfirmation(const char *format, ...)
 int promptInt(char *buffer, int length, int min, int max)
 {
     int ret;      // the variable that will contain the prompted int
-    char *endPtr; // this will allow us to check if the user specified a number or not
+    char *endPtr; // this will allow us to check if the client specified a number or not
     while (1)     // infinite loop until there is a return
     {
         promptString(buffer, length); // prompt a string to the buffer
