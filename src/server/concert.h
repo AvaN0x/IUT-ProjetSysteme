@@ -12,7 +12,5 @@ typedef struct
 concertConfigStruct initConcert();
 bool *getSeatsStatus(concertConfigStruct *);
 int16_t getIndexWhenCode(concertConfigStruct *, char *);
-void reserveTicket(bool *, int, concertConfigStruct *, stream_t *, char *, char *);
-void cancelTicket(bool *, int, concertConfigStruct *, stream_t *, char *, char *);
 
 #endif

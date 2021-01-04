@@ -23,6 +23,7 @@ seatStruct initSeat()
  */
 void dispSeats(bool *seats)
 {
+    printf("\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n0/ Quitter\n");
     int squareroot = (int)sqrt(SEAT_AMOUNT);
     for (int i = 0; i < SEAT_AMOUNT; i++)
     {

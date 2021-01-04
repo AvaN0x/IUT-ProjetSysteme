@@ -111,17 +111,13 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
     char string[BUFFER_SIZE];
     int8_t maxIntValue;
     bool loop = 1;
+    int clientInt;
+    char firstname[NAME_SIZE + 1];
+    char lastname[NAME_SIZE + 1];
+    char code[CODE_LENGTH + 1];
 
     while (loop)
     {
-        sendString(communicationID, &stream, string, serStream, 0, "\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\nChoix : ");
-
-        init_stream(&stream, PROMPT_INT_WITH_MAX);
-        maxIntValue = 2;
-        set_content(&stream, &maxIntValue);
-        serStreamSize = serialize_stream(&stream, serStream);
-        send(communicationID, serStream, serStreamSize, 0); // send buffer to client
-
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
         {
@@ -131,89 +127,120 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
         unserialize_stream(serStream, &stream);
 
-        if (stream.type == INT)
+        switch (stream.type)
         {
-            int receivedInt = *(int8_t *)stream.content;
-            switch (receivedInt)
+        case END_CONNECTION:
+            loop = 0;
+            break;
+        case ASK_SEATS:
+            init_stream(&stream, SEND_SEATS);
+            bool *seats = getSeatsStatus(concertConfig);
+            set_content(&stream, seats);
+            free(seats);
+            serStreamSize = serialize_stream(&stream, serStream);
+            send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+            break;
+
+        case IS_SEAT_STILL_AVAILABLE:
+            clientInt = *(int8_t *)stream.content;
+            init_stream(&stream, INT);
+
+            sem_wait(&semaphore);
+            set_content(&stream, (int8_t *)&(concertConfig->seats[clientInt - 1].isOccupied));
+            sem_post(&semaphore);
+
+            serStreamSize = serialize_stream(&stream, serStream);
+
+            send(communicationID, serStream, serStreamSize, 0); // send buffer to server
+
+            break;
+
+        case SET_SEAT_LASTNAME:
+            memcpy(lastname, (char *)stream.content, NAME_SIZE);
+            break;
+
+        case SET_SEAT_FIRSTNAME:
+            memcpy(firstname, (char *)stream.content, NAME_SIZE);
+            break;
+
+        case SET_SEAT_CODE:
+            memcpy(code, (char *)stream.content, CODE_LENGTH + 1);
+            break;
+
+        case RESERVE_SEAT:
+            if (lastname[0] != '\0' && firstname[0] != '\0')
             {
-            case 0:
-                loop = 0; //? stop the loop, which will disconnect the user
-                sendString(communicationID, &stream, string, serStream, 0, "Passez une bonne journée, aurevoir !\n");
-                break;
+                clientInt = *(int8_t *)stream.content;
+                do
+                {
+                    generateCode(code);
+                } while (getIndexWhenCode(concertConfig, code) != -1);
 
-            case 1:
-                reserveTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
-                break;
+                sem_wait(&semaphore);
+                //? check if the seat is still available
+                if (concertConfig->seats[clientInt - 1].isOccupied == 1)
+                {
+                    sem_post(&semaphore);
+                    init_stream(&stream, ERROR);
+                    serStreamSize = serialize_stream(&stream, serStream);
+                    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+                    continue;
+                }
+                //? if the seat is still available, we set all new values
+                printf("%d | Seat %d reserved by : %s %s (code : %s)\n", communicationID, clientInt, firstname, lastname, code);
 
-            case 2:
-                cancelTicket(&loop, communicationID, concertConfig, &stream, string, serStream);
-                break;
+                concertConfig->seats[clientInt - 1].isOccupied = 1;
+                memcpy(concertConfig->seats[clientInt - 1].firstname, firstname, strlen(firstname) + 1);
+                memcpy(concertConfig->seats[clientInt - 1].lastname, lastname, strlen(lastname) + 1);
+                memcpy(concertConfig->seats[clientInt - 1].code, code, CODE_LENGTH + 1);
 
-            default:
-                break;
+                concertConfig->seats[clientInt - 1].firstname[strlen(firstname)] = '\0';
+                concertConfig->seats[clientInt - 1].lastname[strlen(lastname)] = '\0';
+                concertConfig->seats[clientInt - 1].code[strlen(code)] = '\0';
+
+                sem_post(&semaphore);
+
+                init_stream(&stream, SEND_SEAT_CODE);
+                set_content(&stream, code);
+
+                serStreamSize = serialize_stream(&stream, serStream);
+                send(communicationID, serStream, serStreamSize, 0); // send buffer to client
             }
+            break;
+        case CANCEL_SEAT:
+            if (lastname[0] != '\0' && code[0] != '\0')
+            {
+                clientInt = getIndexWhenCode(concertConfig, code);
+                sem_wait(&semaphore);
+                if (clientInt == -1 || strcmp(concertConfig->seats[clientInt].lastname, lastname) != 0)
+                {
+                    sem_post(&semaphore);
+                    init_stream(&stream, ERROR);
+                    serStreamSize = serialize_stream(&stream, serStream);
+                    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+                }
+                else
+                {
+                    concertConfig->seats[clientInt].isOccupied = 0;
+                    concertConfig->seats[clientInt].firstname[0] = '\0';
+                    concertConfig->seats[clientInt].lastname[0] = '\0';
+                    concertConfig->seats[clientInt].code[0] = '\0';
+                    sem_post(&semaphore);
+
+                    printf("%d | Seat %d reservation canceled (name : %s, code : %s)\n", communicationID, clientInt + 1, lastname, code);
+                    init_stream(&stream, SEAT_CANCELED);
+                    set_content(&stream, &clientInt);
+                    serStreamSize = serialize_stream(&stream, serStream);
+                    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+                }
+            }
+            break;
+
+        default:
+            break;
         }
     }
 
-    disconnectUser(communicationID, &stream, serStream);
-    destroy_stream(&stream);
-}
-
-/**
- * Disconnect an user from the server
- * @param communicationID the id of the communication
- * @param s the stream to send
- * @param serStream the buffer that will contain the serialized stream
- */
-void disconnectUser(int communicationID, stream_t *s, char *serStream)
-{
-    init_stream(s, END_CONNECTION);
-    size_t serStreamSize = serialize_stream(s, serStream);
-    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
     printf("%d | Client disconnected\n", communicationID);
-}
-
-/**
- * Send user a string
- * @param communicationID the id of the communication
- * @param stream the stream to send
- * @param string the buffer that contain the string
- * @param serStream the buffer that will contain the serialized stream
- * @param shouldWait should ask the client to press enter to continue
- * @param format the formated string
- * @return result of recv to check if client disconnected
- */
-int sendString(int communicationID, stream_t *stream, char *string, char *serStream, bool shouldWait, const char *format, ...)
-{
-    init_stream(stream, shouldWait ? STRING_AND_WAIT : STRING);
-
-    va_list argptr;
-    va_start(argptr, format);
-    vsprintf(string, format, argptr);
-    va_end(argptr);
-
-    set_content(stream, string);
-
-    size_t serStreamSize = serialize_stream(stream, serStream);
-    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
-
-    if (shouldWait)
-        return recv(communicationID, serStream, STREAM_SIZE, 0);
-    else
-        return 1;
-}
-
-/**
- * Prompt an user
- * @param communicationID the id of the communication
- * @param s the stream to send
- * @param serStream the buffer that will contain the serialized stream
- * @param length length of the string prompted
- */
-void promptUser(int communicationID, stream_t *s, char *serStream, int length)
-{
-    init_stream(s, PROMPT);
-    set_content(s, &length);
-    size_t serStreamSize = serialize_stream(s, serStream);
-    send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+    destroy_stream(&stream);
 }

@@ -42,26 +42,28 @@ void set_content(stream_t *s, void *content)
     size_t len;
     switch (s->type)
     {
-    case END_CONNECTION:
-        s->content = NULL;
-        break;
-
     case PROMPT:
     case INT:
+    case IS_SEAT_STILL_AVAILABLE:
+    case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
+    case SEAT_CANCELED:
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, content, 1);
         break;
 
     case STRING:
-    case STRING_AND_WAIT:
+    case SET_SEAT_LASTNAME:
+    case SET_SEAT_FIRSTNAME:
+    case SET_SEAT_CODE:
+    case SEND_SEAT_CODE:
         len = strlen((char *)content);
         s->content = malloc(len * sizeof(char));
         memcpy(s->content, content, len);
         ((char *)s->content)[len] = '\0';
         break;
 
-    case PROMPT_WANTED_SEAT:
+    case SEND_SEATS:
         s->content = malloc(SEAT_AMOUNT * sizeof(bool));
         memcpy(s->content, content, SEAT_AMOUNT);
         break;
@@ -96,23 +98,32 @@ size_t serialize_stream(stream_t *s, void *buffer)
     switch (s->type)
     {
     case END_CONNECTION:
+    case ASK_SEATS:
+    case ERROR:
+    case CANCEL_SEAT:
         return sizeof(uint8_t);
 
     case PROMPT:
     case INT:
+    case IS_SEAT_STILL_AVAILABLE:
+    case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
+    case SEAT_CANCELED:
         memcpy(buffer, s->content, 1);
         return sizeof(uint8_t) + sizeof(uint8_t);
 
     case STRING:
-    case STRING_AND_WAIT:
+    case SET_SEAT_LASTNAME:
+    case SET_SEAT_FIRSTNAME:
+    case SET_SEAT_CODE:
+    case SEND_SEAT_CODE:
         len = strlen((char *)s->content);
         *((uint64_t *)buffer) = len;
         buffer += sizeof(uint64_t);
         memcpy(buffer, s->content, len);
         return sizeof(uint8_t) + sizeof(uint64_t) + len;
 
-    case PROMPT_WANTED_SEAT:
+    case SEND_SEATS:
         memcpy(buffer, s->content, SEAT_AMOUNT);
         return sizeof(uint8_t) + SEAT_AMOUNT;
 
@@ -136,13 +147,19 @@ void unserialize_stream(void *buffer, stream_t *s)
     {
     case PROMPT:
     case INT:
+    case IS_SEAT_STILL_AVAILABLE:
+    case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
+    case SEAT_CANCELED:
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, buffer, 1);
         break;
 
     case STRING:
-    case STRING_AND_WAIT:
+    case SET_SEAT_LASTNAME:
+    case SET_SEAT_FIRSTNAME:
+    case SET_SEAT_CODE:
+    case SEND_SEAT_CODE:
         len = *((uint64_t *)buffer);
         buffer += sizeof(uint64_t);
         s->content = malloc((len + 1) * sizeof(char));
@@ -150,7 +167,7 @@ void unserialize_stream(void *buffer, stream_t *s)
         ((char *)s->content)[len] = '\0';
         break;
 
-    case PROMPT_WANTED_SEAT:
+    case SEND_SEATS:
         s->content = malloc(SEAT_AMOUNT * sizeof(bool));
         memcpy(s->content, buffer, SEAT_AMOUNT);
         break;
