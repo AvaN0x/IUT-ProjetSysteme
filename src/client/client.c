@@ -85,12 +85,6 @@ void connectedToServer(int fdSocket)
         }
     } while (loop == 1);
 
-    init_stream(&stream, STRING);
-    set_content(&stream, string);
-    serStreamSize = serialize_stream(&stream, serStream);
-
-    send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
-
     destroy_stream(&stream);
 }
 
