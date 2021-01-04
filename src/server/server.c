@@ -145,9 +145,9 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             clientInt = *(int8_t *)stream.content;
             init_stream(&stream, INT);
 
-            sem_wait(&semaphore);
+            sem_wait(&semaphore); // block the access to the concertConfig
             set_content(&stream, (int8_t *)&(concertConfig->seats[clientInt - 1].isOccupied));
-            sem_post(&semaphore);
+            sem_post(&semaphore); // free the access to the concertConfig
 
             serStreamSize = serialize_stream(&stream, serStream);
 
@@ -176,11 +176,11 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                     generateCode(code);
                 } while (getIndexWhenCode(concertConfig, code) != -1);
 
-                sem_wait(&semaphore);
+                sem_wait(&semaphore); // block the access to the concertConfig
                 //? check if the seat is still available
                 if (concertConfig->seats[clientInt - 1].isOccupied == 1)
                 {
-                    sem_post(&semaphore);
+                    sem_post(&semaphore); // free the access to the concertConfig
                     init_stream(&stream, ERROR);
                     serStreamSize = serialize_stream(&stream, serStream);
                     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
@@ -198,7 +198,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                 concertConfig->seats[clientInt - 1].lastname[strlen(lastname)] = '\0';
                 concertConfig->seats[clientInt - 1].code[strlen(code)] = '\0';
 
-                sem_post(&semaphore);
+                sem_post(&semaphore); // free the access to the concertConfig
 
                 init_stream(&stream, SEND_SEAT_CODE);
                 set_content(&stream, code);
@@ -211,10 +211,10 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             if (lastname[0] != '\0' && code[0] != '\0')
             {
                 clientInt = getIndexWhenCode(concertConfig, code);
-                sem_wait(&semaphore);
+                sem_wait(&semaphore); // block the access to the concertConfig
                 if (clientInt == -1 || strcmp(concertConfig->seats[clientInt].lastname, lastname) != 0)
                 {
-                    sem_post(&semaphore);
+                    sem_post(&semaphore); // free the access to the concertConfig
                     init_stream(&stream, ERROR);
                     serStreamSize = serialize_stream(&stream, serStream);
                     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
@@ -225,7 +225,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                     concertConfig->seats[clientInt].firstname[0] = '\0';
                     concertConfig->seats[clientInt].lastname[0] = '\0';
                     concertConfig->seats[clientInt].code[0] = '\0';
-                    sem_post(&semaphore);
+                    sem_post(&semaphore); // free the access to the concertConfig
 
                     printf("%d | Seat %d reservation canceled (name : %s, code : %s)\n", communicationID, clientInt + 1, lastname, code);
                     init_stream(&stream, SEAT_CANCELED);
