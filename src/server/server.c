@@ -141,7 +141,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             send(communicationID, serStream, serStreamSize, 0); // send buffer to client
             break;
 
-        case IS_SEAT_STILL_AVAILABLE:
+        case IS_SEAT_AVAILABLE:
             clientInt = *(int8_t *)stream.content;
             init_stream(&stream, INT);
 

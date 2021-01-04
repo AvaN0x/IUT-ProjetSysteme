@@ -44,7 +44,7 @@ void set_content(stream_t *s, void *content)
     {
     case PROMPT:
     case INT:
-    case IS_SEAT_STILL_AVAILABLE:
+    case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
     case SEAT_CANCELED:
@@ -105,7 +105,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
 
     case PROMPT:
     case INT:
-    case IS_SEAT_STILL_AVAILABLE:
+    case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
     case SEAT_CANCELED:
@@ -147,7 +147,7 @@ void unserialize_stream(void *buffer, stream_t *s)
     {
     case PROMPT:
     case INT:
-    case IS_SEAT_STILL_AVAILABLE:
+    case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case PROMPT_INT_WITH_MAX:
     case SEAT_CANCELED:
