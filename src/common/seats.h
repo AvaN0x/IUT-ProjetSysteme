@@ -17,7 +17,7 @@ typedef struct
 
 seatStruct initSeat();
 bool seatIsOccupied(seatStruct *);
-void dispSeats(bool *);
+void dispSeats(bool *, bool);
 void generateCode(char *);
 int randomInt(int, int);
 

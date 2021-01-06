@@ -120,7 +120,8 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         }
         unserialize_stream(serStream, stream);
 
-        dispSeats((bool *)stream->content); // display a table of all seats, it contain the header and the footer
+        printf("\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n");
+        dispSeats((bool *)stream->content, 0); // display a table of all seats, it contain the header and the footer
 
         weantedSeat = promptInt(string, BUFFER_SIZE, 0, SEAT_AMOUNT);
         if (weantedSeat == 0)
@@ -270,9 +271,7 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
     int bufSize;          // contain the return of recv()
     char adminCode[CODE_LENGTH + 1];
     bool loop = 1;
-    int promptedInt;
-
-    printf("\n*------- ADMINISTRATION -------*");
+    int promptedInt, seatNumber;
 
     if (*isAdmin != 1)
     {
@@ -294,7 +293,7 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
             return; // stop the function
         }
 
-        printf("\nVeuillez saisir le code admin ayant été affiché dans la console serveur : ");
+        printf("\n*------- ADMINISTRATION -------*\nVeuillez saisir le code admin ayant été affiché dans la console serveur : ");
         promptString(adminCode, CODE_LENGTH + 1);
 
         init_stream(stream, ADMIN_CHECK_CODE); // send admin code to server
@@ -313,18 +312,18 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
         // check the answer of the server
         if (stream->type != SUCCESS)
         {
-            printf("\n=> Le code saisi est invalide\n(Appuyez sur entrer pour continuer)\n");
+            printf("=> Le code saisi est invalide\n(Appuyez sur entrer pour continuer)\n");
             promptString(string, BUFFER_SIZE);
             return; // stop the function
         }
 
-        printf("\n=> Votre connexion a été reconnue.\n");
+        printf("=> Votre connexion a été reconnue.\n");
         *isAdmin = 1;
     }
 
     do
     {
-        printf("\n0/ Quitter\n1/ Etats de chaque siège\nChoix : ");
+        printf("\n*------- ADMINISTRATION -------*\n0/ Quitter\n1/ Informations sur les sièges réservés\n2/ Annuler la réservation d'un siège\nChoix : ");
         promptedInt = promptInt(string, BUFFER_SIZE, 0, 3); // prompt the client an int (choice)
 
         switch (promptedInt)
@@ -333,8 +332,37 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
             loop = 0; // stop the loop
             break;
         case 1:
+            init_stream(stream, ADMIN_PRINT_ALL_OCCUPIED_SEAT); // send admin code to server
+            serStreamSize = serialize_stream(stream, serStream);
+            send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
+            printf("\n=> Le status de chaque siège réservé à été affiché sur la console serveur.\n(Appuyez sur entrer pour continuer)\n");
+            promptString(string, BUFFER_SIZE);
             break;
         case 2:
+            init_stream(stream, ASK_SEATS); // ask the server to send seats
+            serStreamSize = serialize_stream(stream, serStream);
+            send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
+
+            bufSize = recv(fdSocket, serStream, STREAM_SIZE, 0);
+            if (bufSize < 1)
+                break;
+
+            unserialize_stream(serStream, stream);
+
+            printf("\nEntrez le numéro de siège que vous voulez annuler.\n");
+            dispSeats((bool *)stream->content, 1); // display a table of all seats, it contain the header and the footer
+
+            seatNumber = promptInt(string, BUFFER_SIZE, 0, SEAT_AMOUNT);
+            if (seatNumber != 0)
+            {
+                init_stream(stream, ADMIN_CANCEL_SEAT); // check if the seat is available
+                set_content(stream, &seatNumber);
+                serStreamSize = serialize_stream(stream, serStream);
+                send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
+
+                printf("\n=> Observer la console serveur pour savoir si un changement a été effectué.\n(Appuyez sur entrer pour continuer)\n");
+                promptString(string, BUFFER_SIZE);
+            }
             break;
         }
     } while (loop == 1);

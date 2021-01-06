@@ -47,6 +47,7 @@ void set_content(stream_t *s, void *content)
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case SEAT_CANCELED:
+    case ADMIN_CANCEL_SEAT:
         s->content = malloc(sizeof(int8_t));
         memcpy(s->content, content, 1);
         break;
@@ -105,6 +106,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
     case SUCCESS:
     case CANCEL_SEAT:
     case ADMIN_ASK_CODE:
+    case ADMIN_PRINT_ALL_OCCUPIED_SEAT:
         return sizeof(uint8_t);
 
     // if content is an int
@@ -112,6 +114,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case SEAT_CANCELED:
+    case ADMIN_CANCEL_SEAT:
         memcpy(buffer, s->content, 1); // copy the int
         return sizeof(uint8_t) + sizeof(uint8_t);
 
@@ -155,6 +158,7 @@ void unserialize_stream(void *buffer, stream_t *s)
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case SEAT_CANCELED:
+    case ADMIN_CANCEL_SEAT:
         s->content = malloc(sizeof(int8_t)); // allocate the size of an int
         memcpy(s->content, buffer, 1);       // copy the int
         break;

@@ -16,22 +16,24 @@ typedef struct
 
 enum
 {
-    INT,                //? content : int
-    RESERVE_SEAT,       //? content : int = seat number
-    IS_SEAT_AVAILABLE,  //? content : int = seat number
-    SEAT_CANCELED,      //? content : int = seat number
-    SET_SEAT_LASTNAME,  //? content : string = lastname
-    SET_SEAT_FIRSTNAME, //? content : string = firstname
-    SET_SEAT_CODE,      //? content : string = code
-    SEND_SEAT_CODE,     //? content : string = code
-    SEND_SEATS,         //? content : seats[] = array of bool for seats
-    ASK_SEATS,          //? content : NULL
-    CANCEL_SEAT,        //? content : NULL
-    ERROR,              //? content : NULL
-    SUCCESS,            //? content : NULL
-    END_CONNECTION,     //? content : NULL
-    ADMIN_ASK_CODE,     //? content : NULL
-    ADMIN_CHECK_CODE    //? content : string = code
+    INT,                           //? content : int
+    RESERVE_SEAT,                  //? content : int = seat number
+    IS_SEAT_AVAILABLE,             //? content : int = seat number
+    SEAT_CANCELED,                 //? content : int = seat number
+    SET_SEAT_LASTNAME,             //? content : string = lastname
+    SET_SEAT_FIRSTNAME,            //? content : string = firstname
+    SET_SEAT_CODE,                 //? content : string = code
+    SEND_SEAT_CODE,                //? content : string = code
+    SEND_SEATS,                    //? content : seats[] = array of bool for seats
+    ASK_SEATS,                     //? content : NULL
+    CANCEL_SEAT,                   //? content : NULL
+    ERROR,                         //? content : NULL
+    SUCCESS,                       //? content : NULL
+    END_CONNECTION,                //? content : NULL
+    ADMIN_ASK_CODE,                //? content : NULL
+    ADMIN_PRINT_ALL_OCCUPIED_SEAT, //? content : NULL
+    ADMIN_CHECK_CODE,              //? content : string = code
+    ADMIN_CANCEL_SEAT              //? content : int
 };
 
 stream_t create_stream();

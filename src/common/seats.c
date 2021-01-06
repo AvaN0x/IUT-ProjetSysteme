@@ -21,16 +21,15 @@ seatStruct initSeat()
  * Display a table of seats
  * @param seats the array (bool[]) of seats
  */
-void dispSeats(bool *seats)
+void dispSeats(bool *seats, bool cancel)
 {
-    printf("\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n0/ Quitter\n");
-
+    printf("0/ Quitter\n");
     // find the squareroot of SEAT_AMOUNT to know how many columns we need to display
     int squareroot = (int)sqrt(SEAT_AMOUNT);
     for (int i = 0; i < SEAT_AMOUNT; i++)
     {
-        if (seats[i] == 0)         // check if the seat is available
-            printf("%3d ", i + 1); // display the available seat number as a 3 digit numbers
+        if ((seats[i] == 0 && !cancel) || (seats[i] != 0 && cancel)) // check if the seat is available
+            printf("%3d ", i + 1);                                   // display the available seat number as a 3 digit numbers
         else
             printf("  X "); // display a cross a reserved seat
 
