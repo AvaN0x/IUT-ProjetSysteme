@@ -252,6 +252,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             break;
 
         case ADMIN_ASK_CODE:
+            // the client want a code to be an admin
             generateCode(adminCode);
             printf("%d | Admin code to enter : " FONT_MAGENTA "%s\n" FONT_DEFAULT, communicationID, adminCode);
             init_stream(&stream, SUCCESS);
@@ -260,6 +261,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             break;
 
         case ADMIN_CHECK_CODE:
+            // the client prompted a code, we check if it is the good one
             if (strcmp(adminCode, (char *)stream.content) == 0)
                 init_stream(&stream, SUCCESS);
             else
@@ -269,6 +271,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             break;
 
         case ADMIN_PRINT_ALL_OCCUPIED_SEAT:
+            // the client want to know the state of all seats
             printf(FONT_MAGENTA "\n[ADMIN]" FONT_DEFAULT " %d | Asked informations about all occupied seats.\n", communicationID);
             sem_wait(&semaphore); // block the access to the concertConfig
             for (int i = 0; i < SEAT_AMOUNT; i++)
@@ -279,6 +282,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             break;
 
         case ADMIN_CANCEL_SEAT:
+            // the client want to cancel a specified seat
             clientInt = *(int8_t *)stream.content;
             sem_wait(&semaphore); // block the access to the concertConfig
             if (concertConfig->seats[clientInt - 1].isOccupied == 0)
