@@ -22,7 +22,7 @@ stream_t create_stream()
  */
 void init_stream(stream_t *s, uint8_t type)
 {
-    if (s->content != NULL)
+    if (s->content != NULL) // free content allocation if not NULL
         free(s->content);
 
     s->content = NULL;
@@ -36,12 +36,13 @@ void init_stream(stream_t *s, uint8_t type)
  */
 void set_content(stream_t *s, void *content)
 {
-    if (s->content != NULL)
+    if (s->content != NULL) // free content allocation if not NULL
         free(s->content);
 
     size_t len;
     switch (s->type)
     {
+    // if content is an int
     case INT:
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
@@ -50,19 +51,21 @@ void set_content(stream_t *s, void *content)
         memcpy(s->content, content, 1);
         break;
 
+    // if content is a string
     case SET_SEAT_LASTNAME:
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
-        len = strlen((char *)content);
-        s->content = malloc(len * sizeof(char));
-        memcpy(s->content, content, len);
-        ((char *)s->content)[len] = '\0';
+        len = strlen((char *)content);           // get the length of the string
+        s->content = malloc(len * sizeof(char)); // allocate the memory for the string
+        memcpy(s->content, content, len);        // copy content
+        ((char *)s->content)[len] = '\0';        // set the last char as '\0' to end the string
         break;
 
+    // if content is a bool[]
     case SEND_SEATS:
-        s->content = malloc(SEAT_AMOUNT * sizeof(bool));
-        memcpy(s->content, content, SEAT_AMOUNT);
+        s->content = malloc(SEAT_AMOUNT * sizeof(bool)); // allocate the memory for the array
+        memcpy(s->content, content, SEAT_AMOUNT);        // copy content
         break;
 
     default:
@@ -76,7 +79,7 @@ void set_content(stream_t *s, void *content)
  */
 void destroy_stream(stream_t *s)
 {
-    if (s->content != NULL)
+    if (s->content != NULL) // free content allocation if not NULL
         free(s->content);
 }
 
@@ -89,36 +92,40 @@ void destroy_stream(stream_t *s)
 size_t serialize_stream(stream_t *s, void *buffer)
 {
     *((uint8_t *)buffer) = s->type;
-    buffer += sizeof(uint8_t);
+    buffer += sizeof(uint8_t); // move in the buffer of the size of the type
 
     size_t len;
     switch (s->type)
     {
+    // if content is NULL
     case END_CONNECTION:
     case ASK_SEATS:
     case ERROR:
     case CANCEL_SEAT:
         return sizeof(uint8_t);
 
+    // if content is an int
     case INT:
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case SEAT_CANCELED:
-        memcpy(buffer, s->content, 1);
+        memcpy(buffer, s->content, 1); // copy the int
         return sizeof(uint8_t) + sizeof(uint8_t);
 
+    // if content is a string
     case SET_SEAT_LASTNAME:
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
-        len = strlen((char *)s->content);
-        *((uint64_t *)buffer) = len;
-        buffer += sizeof(uint64_t);
-        memcpy(buffer, s->content, len);
+        len = strlen((char *)s->content); // get the length of the string
+        *((uint64_t *)buffer) = len;      // add the length to the buffer as int64_t
+        buffer += sizeof(uint64_t);       // move in the buffer
+        memcpy(buffer, s->content, len);  // copy the string
         return sizeof(uint8_t) + sizeof(uint64_t) + len;
 
+    // if content is a bool[]
     case SEND_SEATS:
-        memcpy(buffer, s->content, SEAT_AMOUNT);
+        memcpy(buffer, s->content, SEAT_AMOUNT); // copy the array
         return sizeof(uint8_t) + SEAT_AMOUNT;
 
     default:
@@ -133,34 +140,37 @@ size_t serialize_stream(stream_t *s, void *buffer)
  */
 void unserialize_stream(void *buffer, stream_t *s)
 {
-    init_stream(s, *((uint8_t *)buffer));
+    init_stream(s, *((uint8_t *)buffer)); // re init the stream
 
-    buffer += sizeof(uint8_t);
+    buffer += sizeof(uint8_t); // move in the buffer of the size of the type
     size_t len;
     switch (s->type)
     {
+    // if content is an int
     case INT:
     case IS_SEAT_AVAILABLE:
     case RESERVE_SEAT:
     case SEAT_CANCELED:
-        s->content = malloc(sizeof(int8_t));
-        memcpy(s->content, buffer, 1);
+        s->content = malloc(sizeof(int8_t)); // allocate the size of an int
+        memcpy(s->content, buffer, 1);       // copy the int
         break;
 
+    // if content is a string
     case SET_SEAT_LASTNAME:
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
-        len = *((uint64_t *)buffer);
-        buffer += sizeof(uint64_t);
-        s->content = malloc((len + 1) * sizeof(char));
-        memcpy(s->content, buffer, len);
-        ((char *)s->content)[len] = '\0';
+        len = *((uint64_t *)buffer);                   // get the length of the string
+        buffer += sizeof(uint64_t);                    // move is the buffer
+        s->content = malloc((len + 1) * sizeof(char)); // allocate the size of the string
+        memcpy(s->content, buffer, len);               // copy content
+        ((char *)s->content)[len] = '\0';              // set the last char as '\0' to end the string
         break;
 
+    // if content is a bool[]
     case SEND_SEATS:
-        s->content = malloc(SEAT_AMOUNT * sizeof(bool));
-        memcpy(s->content, buffer, SEAT_AMOUNT);
+        s->content = malloc(SEAT_AMOUNT * sizeof(bool)); // allocate the size of the array
+        memcpy(s->content, buffer, SEAT_AMOUNT);         // copy content of the array
         break;
 
     default:

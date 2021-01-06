@@ -108,15 +108,16 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 {
     stream_t stream = create_stream(); // stream that is used with this client
     char serStream[STREAM_SIZE];       // serialized stream
-    size_t serStreamSize;
+    size_t serStreamSize;              // buffer that contain the serialized stream
     bool loop = 1;
     int clientInt;
-    char firstname[NAME_SIZE + 1];
-    char lastname[NAME_SIZE + 1];
-    char code[CODE_LENGTH + 1];
+    char firstname[NAME_SIZE + 1]; // string for the firstname
+    char lastname[NAME_SIZE + 1];  // string for the lastname
+    char code[CODE_LENGTH + 1];    // string for the code
 
     while (loop)
     {
+        // wait to receive a message from the client
         int bufSize = recv(communicationID, serStream, STREAM_SIZE, 0);
         if (bufSize < 1)
         {
@@ -126,6 +127,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
         unserialize_stream(serStream, &stream);
 
+        // check the type of the stream
         switch (stream.type)
         {
         case END_CONNECTION:
