@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "consoleStyle.h"
 #include "seats.h"
 
 /**
@@ -23,18 +24,18 @@ seatStruct initSeat()
  */
 void dispSeats(bool *seats, bool cancel)
 {
-    printf("0/ Quitter\n");
+    printf("  0/ Quitter\n");
     // find the squareroot of SEAT_AMOUNT to know how many columns we need to display
     int squareroot = (int)sqrt(SEAT_AMOUNT);
     for (int i = 0; i < SEAT_AMOUNT; i++)
     {
         if ((seats[i] == 0 && !cancel) || (seats[i] != 0 && cancel)) // check if the seat is available
-            printf("%3d ", i + 1);                                   // display the available seat number as a 3 digit numbers
+            printf(FONT_GREEN "%3d ", i + 1);                        // display the available seat number as a 3 digit numbers
         else
-            printf("  X "); // display a cross a reserved seat
+            printf(FONT_RED "  X "); // display a cross a reserved seat
 
         if ((i + 1) % squareroot == 0 || i == (SEAT_AMOUNT - 1)) // if we are at the end of a line, or at the end of the array
-            printf("\n");                                        // then we print a line break
+            printf(FONT_DEFAULT "\n");                           // then we print a line break
     }
     printf("Choix : ");
 }

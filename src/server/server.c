@@ -12,6 +12,7 @@
 #include <time.h>   // for random functions
 
 #include "semaphore.h"
+#include "../common/consoleStyle.h"
 #include "../common/stream.h"
 #include "server.h"
 
@@ -26,7 +27,7 @@ int main()
     int serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
     {
-        printf("Incorrect socket\n");
+        printf(FONT_RED "Incorrect socket\n" FONT_DEFAULT);
         exit(EXIT_FAILURE);
     }
 
@@ -39,12 +40,12 @@ int main()
     if (bind(serverSocket, (struct sockaddr *)&serverAddr,
              sizeof(serverAddr)) == -1)
     {
-        printf("Bind error, PORT may already be in use.\n");
+        printf(FONT_RED "Bind error, PORT may already be in use.\n" FONT_DEFAULT);
         exit(EXIT_FAILURE);
     }
     if (listen(serverSocket, 5) == -1)
     {
-        printf("Listen error.\n");
+        printf(FONT_RED "Listen error.\n" FONT_DEFAULT);
         exit(EXIT_FAILURE);
     }
 
@@ -73,7 +74,7 @@ int main()
         }
         else
         {
-            printf("Connection acceptation error\n");
+            printf(FONT_RED "Connection acceptation error\n" FONT_DEFAULT);
         }
     }
     close(serverSocket);
@@ -195,7 +196,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                     continue;
                 }
                 //? if the seat is still available, we set all new values
-                printf("%d | Seat %d reserved by : %s %s (code : %s)\n", communicationID, clientInt, firstname, lastname, code);
+                printf("%d | " FONT_GREEN "Seat %d reserved" FONT_DEFAULT " by : %s %s (code : %s)\n", communicationID, clientInt, firstname, lastname, code);
 
                 concertConfig->seats[clientInt - 1].isOccupied = 1; // we set the seat as not available
 
@@ -240,7 +241,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                     concertConfig->seats[clientInt].code[0] = '\0';
                     sem_post(&semaphore); // free the access to the concertConfig
 
-                    printf("%d | Seat %d reservation canceled (name : %s, code : %s)\n", communicationID, clientInt + 1, lastname, code);
+                    printf("%d | " FONT_RED "Seat %d reservation canceled" FONT_DEFAULT " (name : %s, code : %s)\n", communicationID, clientInt + 1, lastname, code);
 
                     init_stream(&stream, SEAT_CANCELED); // we tell the client that the seat reservation is now canceled
                     set_content(&stream, &clientInt);
@@ -252,7 +253,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
         case ADMIN_ASK_CODE:
             generateCode(adminCode);
-            printf("%d | Code admin à saisir : %s\n", communicationID, adminCode);
+            printf("%d | Admin code to enter : " FONT_MAGENTA "%s\n" FONT_DEFAULT, communicationID, adminCode);
             init_stream(&stream, SUCCESS);
             serStreamSize = serialize_stream(&stream, serStream);
             send(communicationID, serStream, serStreamSize, 0); // send buffer to client
@@ -268,13 +269,13 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             break;
 
         case ADMIN_PRINT_ALL_OCCUPIED_SEAT:
-            printf("\n[ADMIN] %d | Asked informations about all occupied seats.\n", communicationID);
+            printf(FONT_MAGENTA "\n[ADMIN]" FONT_DEFAULT " %d | Asked informations about all occupied seats.\n", communicationID);
             sem_wait(&semaphore); // block the access to the concertConfig
             for (int i = 0; i < SEAT_AMOUNT; i++)
                 if (concertConfig->seats[i].isOccupied == 1) // if the seat is occupied
-                    printf("[ADMIN] Seat #%d is occupied by \"%s %s\" with the following code : %s\n", i + 1, concertConfig->seats[i].firstname, concertConfig->seats[i].lastname, concertConfig->seats[i].code);
+                    printf(FONT_MAGENTA "[ADMIN]" FONT_DEFAULT " Seat #%d is occupied by \"%s %s\" with the following code : %s\n", i + 1, concertConfig->seats[i].firstname, concertConfig->seats[i].lastname, concertConfig->seats[i].code);
             sem_post(&semaphore); // free the access to the concertConfig
-            printf("[ADMIN] %d | All occupied seat have been checked.\n", communicationID);
+            printf(FONT_MAGENTA "[ADMIN]" FONT_DEFAULT " %d | All occupied seat have been checked.\n", communicationID);
             break;
 
         case ADMIN_CANCEL_SEAT:
@@ -283,7 +284,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
             if (concertConfig->seats[clientInt - 1].isOccupied == 0)
             {
                 sem_post(&semaphore); // free the access to the concertConfig
-                printf("[ADMIN] %d | The seat #%d is not occupied.\n", communicationID, clientInt + 1);
+                printf(FONT_MAGENTA "[ADMIN]" FONT_DEFAULT " %d | The seat #%d is not occupied.\n", communicationID, clientInt + 1);
             }
             else
             {
@@ -292,7 +293,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                 concertConfig->seats[clientInt - 1].lastname[0] = '\0';
                 concertConfig->seats[clientInt - 1].code[0] = '\0';
                 sem_post(&semaphore); // free the access to the concertConfig
-                printf("[ADMIN] %d | The seat #%d reservation is now canceled.\n", communicationID, clientInt);
+                printf(FONT_MAGENTA "[ADMIN]" FONT_DEFAULT " %d | " FONT_RED "The seat #%d reservation is now canceled.\n" FONT_DEFAULT, communicationID, clientInt);
             }
             break;
         default:

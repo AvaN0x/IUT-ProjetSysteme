@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdarg.h> // for infinite parameters
 
+#include "../common/consoleStyle.h"
 #include "../common/seats.h"
 #include "../common/stream.h"
 #include "client.h"
@@ -24,7 +25,7 @@ int main()
     int fdSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (fdSocket < 0)
     {
-        printf("Incorrect socket\n");
+        printf(FONT_RED "Incorrect socket\n" FONT_DEFAULT);
         exit(EXIT_FAILURE);
     }
 
@@ -36,10 +37,10 @@ int main()
 
     if (connect(fdSocket, (struct sockaddr *)&serverCoords, sizeof(serverCoords)) == -1)
     {
-        printf("Connection failed\n");
+        printf(FONT_RED "Connection failed\n" FONT_DEFAULT);
         exit(EXIT_FAILURE);
     }
-    printf("Connected to %s:%d\n", ADDRESS, PORT);
+    printf(FONT_GREEN "Connected to %s:%d\n" FONT_DEFAULT, ADDRESS, PORT);
 
     // call the function that manage the connection
     connectedToServer(fdSocket);
@@ -66,7 +67,7 @@ void connectedToServer(int fdSocket)
 
     do
     {
-        printf("\n*------- CONCERT -------*\n0/ Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\n3/ Interface administrateur\nChoix : ");
+        printf(FONT_BLUE "\n*------- CONCERT -------*" FONT_DEFAULT "\n" FONT_RED "0/" FONT_DEFAULT " Quitter\n1/ Réserver un ticket\n2/ Annuler un ticket\n3/ Interface administrateur\nChoix : ");
         promptedInt = promptInt(string, BUFFER_SIZE, 0, 3); // prompt the client an int (choice)
 
         switch (promptedInt)
@@ -120,7 +121,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         }
         unserialize_stream(serStream, stream);
 
-        printf("\n*------- SALLE DE CONCERT -------*\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n");
+        printf(FONT_BLUE "\n*------- SALLE DE CONCERT -------*" FONT_DEFAULT "\nChaque X correspond à une place réservée. Veuillez entrer le numéro d'une place ou 0.\n");
         dispSeats((bool *)stream->content, 0); // display a table of all seats, it contain the header and the footer
 
         weantedSeat = promptInt(string, BUFFER_SIZE, 0, SEAT_AMOUNT);
@@ -190,7 +191,7 @@ void reserveTicket(int fdSocket, stream_t *stream, char *string, char *serStream
         }
         else if (stream->type == SEND_SEAT_CODE) // the seat is still available
         {
-            printf("\n%s %s,\nvoici votre code (à conserver) : %s\n", lastname, firstname, (char *)stream->content);
+            printf("\n%s %s,\nvoici votre code (à conserver) : " FONT_BLUE "%s\n" FONT_DEFAULT, lastname, firstname, (char *)stream->content);
             printf("(Appuyez sur entrer pour continuer)\n");
             promptString(string, BUFFER_SIZE);
             loop = 0; // set the loop at false, this will make the client go back to the lobby
@@ -228,7 +229,7 @@ void cancelTicket(int fdSocket, stream_t *stream, char *string, char *serStream)
     serStreamSize = serialize_stream(stream, serStream);
     send(fdSocket, serStream, serStreamSize, 0); // send buffer to server
 
-    if (!promptConfirmation("Voulez vous vraiment supprimer votre réservation? (O ou N)\n"))
+    if (!promptConfirmation("Voulez vous vraiment supprimer votre réservation? (" FONT_GREEN "O" FONT_DEFAULT " ou " FONT_RED "N" FONT_DEFAULT ")\n"))
         return;
 
     init_stream(stream, CANCEL_SEAT);  // ask the server to cancel the seat
@@ -245,14 +246,13 @@ void cancelTicket(int fdSocket, stream_t *stream, char *string, char *serStream)
     // check the answer of the server
     if (stream->type == ERROR) // ERROR if values does not match with any seat
     {
-        printf("\n=> Les informations saisient ne correspondant à aucunes places.\n(Appuyez sur entrer pour continuer)\n");
+        printf(FONT_RED "\n=> Les informations saisient ne correspondant à aucunes places." FONT_DEFAULT "\n(Appuyez sur entrer pour continuer)\n");
         promptString(string, BUFFER_SIZE);
         return;
     }
     else if (stream->type == SEAT_CANCELED) // the seat exist and everything match
     {
-        printf("\n=> Votre réservation du siège numéro %d est annulée.\n", *(int *)stream->content + 1);
-        printf("(Appuyez sur entrer pour continuer)\n");
+        printf(FONT_GREEN "\n=> Votre réservation du siège numéro %d est annulée.\n" FONT_DEFAULT "(Appuyez sur entrer pour continuer)\n", *(int *)stream->content + 1);
         promptString(string, BUFFER_SIZE);
     }
 }
@@ -293,7 +293,7 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
             return; // stop the function
         }
 
-        printf("\n*------- ADMINISTRATION -------*\nVeuillez saisir le code admin ayant été affiché dans la console serveur : ");
+        printf(FONT_MAGENTA "\n*------- ADMINISTRATION -------*" FONT_DEFAULT "\nVeuillez saisir le code admin ayant été affiché dans la console serveur : ");
         promptString(adminCode, CODE_LENGTH + 1);
 
         init_stream(stream, ADMIN_CHECK_CODE); // send admin code to server
@@ -312,18 +312,18 @@ void adminPanel(int fdSocket, stream_t *stream, char *string, char *serStream, b
         // check the answer of the server
         if (stream->type != SUCCESS)
         {
-            printf("=> Le code saisi est invalide\n(Appuyez sur entrer pour continuer)\n");
+            printf(FONT_RED "=> Le code saisi est invalide" FONT_DEFAULT "\n(Appuyez sur entrer pour continuer)\n");
             promptString(string, BUFFER_SIZE);
             return; // stop the function
         }
 
-        printf("=> Votre connexion a été reconnue.\n");
+        printf(FONT_GREEN "=> Votre connexion a été reconnue.\n");
         *isAdmin = 1;
     }
 
     do
     {
-        printf("\n*------- ADMINISTRATION -------*\n0/ Quitter\n1/ Informations sur les sièges réservés\n2/ Annuler la réservation d'un siège\nChoix : ");
+        printf(FONT_MAGENTA "\n*------- ADMINISTRATION -------*" FONT_DEFAULT "\n" FONT_RED "0/" FONT_DEFAULT " Quitter\n1/ Informations sur les sièges réservés\n2/ Annuler la réservation d'un siège\nChoix : ");
         promptedInt = promptInt(string, BUFFER_SIZE, 0, 3); // prompt the client an int (choice)
 
         switch (promptedInt)
