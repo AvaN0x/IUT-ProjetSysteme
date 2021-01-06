@@ -28,7 +28,10 @@ enum
     ASK_SEATS,          //? content : NULL
     CANCEL_SEAT,        //? content : NULL
     ERROR,              //? content : NULL
-    END_CONNECTION      //? content : NULL
+    SUCCESS,            //? content : NULL
+    END_CONNECTION,     //? content : NULL
+    ADMIN_ASK_CODE,     //? content : NULL
+    ADMIN_CHECK_CODE    //? content : string = code
 };
 
 stream_t create_stream();

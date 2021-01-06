@@ -111,9 +111,10 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
     size_t serStreamSize;              // buffer that contain the serialized stream
     bool loop = 1;
     int clientInt;
-    char firstname[NAME_SIZE + 1]; // string for the firstname
-    char lastname[NAME_SIZE + 1];  // string for the lastname
-    char code[CODE_LENGTH + 1];    // string for the code
+    char firstname[NAME_SIZE + 1];   // string for the firstname
+    char lastname[NAME_SIZE + 1];    // string for the lastname
+    char code[CODE_LENGTH + 1];      // string for the code
+    char adminCode[CODE_LENGTH + 1]; // string for the admin code
 
     while (loop)
     {
@@ -247,6 +248,23 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
                     send(communicationID, serStream, serStreamSize, 0); // send buffer to client
                 }
             }
+            break;
+
+        case ADMIN_ASK_CODE:
+            generateCode(adminCode);
+            printf("%d | Code admin à saisir : %s\n", communicationID, adminCode);
+            init_stream(&stream, SUCCESS);
+            serStreamSize = serialize_stream(&stream, serStream);
+            send(communicationID, serStream, serStreamSize, 0); // send buffer to client
+            break;
+
+        case ADMIN_CHECK_CODE:
+            if (strcmp(adminCode, (char *)stream.content) == 0)
+                init_stream(&stream, SUCCESS);
+            else
+                init_stream(&stream, ERROR);
+            serStreamSize = serialize_stream(&stream, serStream);
+            send(communicationID, serStream, serStreamSize, 0); // send buffer to client
             break;
 
         default:

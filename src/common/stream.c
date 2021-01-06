@@ -56,6 +56,7 @@ void set_content(stream_t *s, void *content)
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
+    case ADMIN_CHECK_CODE:
         len = strlen((char *)content);           // get the length of the string
         s->content = malloc(len * sizeof(char)); // allocate the memory for the string
         memcpy(s->content, content, len);        // copy content
@@ -101,7 +102,9 @@ size_t serialize_stream(stream_t *s, void *buffer)
     case END_CONNECTION:
     case ASK_SEATS:
     case ERROR:
+    case SUCCESS:
     case CANCEL_SEAT:
+    case ADMIN_ASK_CODE:
         return sizeof(uint8_t);
 
     // if content is an int
@@ -117,6 +120,7 @@ size_t serialize_stream(stream_t *s, void *buffer)
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
+    case ADMIN_CHECK_CODE:
         len = strlen((char *)s->content); // get the length of the string
         *((uint64_t *)buffer) = len;      // add the length to the buffer as int64_t
         buffer += sizeof(uint64_t);       // move in the buffer
@@ -160,6 +164,7 @@ void unserialize_stream(void *buffer, stream_t *s)
     case SET_SEAT_FIRSTNAME:
     case SET_SEAT_CODE:
     case SEND_SEAT_CODE:
+    case ADMIN_CHECK_CODE:
         len = *((uint64_t *)buffer);                   // get the length of the string
         buffer += sizeof(uint64_t);                    // move is the buffer
         s->content = malloc((len + 1) * sizeof(char)); // allocate the size of the string
