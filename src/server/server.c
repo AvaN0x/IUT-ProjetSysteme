@@ -60,7 +60,6 @@ int main()
     int sockaddr_in_size = sizeof(struct sockaddr_in);
     while (1)
     {
-        printf("Waiting for connection :\n");
         connectionStruct myConnectionStruct;
         myConnectionStruct.concertConfig = &concertConfig; // set the address of the concertConfig variable
 
@@ -272,7 +271,7 @@ void clientConnected(int communicationID, concertConfigStruct *concertConfig)
 
         case ADMIN_PRINT_ALL_OCCUPIED_SEAT:
             // the client want to know the state of all seats
-            printf(FONT_MAGENTA "\n[ADMIN]" FONT_DEFAULT " %d | Asked informations about all occupied seats.\n", communicationID);
+            printf(FONT_MAGENTA "[ADMIN]" FONT_DEFAULT " %d | Asked informations about all occupied seats.\n", communicationID);
             sem_wait(&semaphore); // block the access to the concertConfig
             for (int i = 0; i < SEAT_AMOUNT; i++)
                 if (concertConfig->seats[i].isOccupied == 1) // if the seat is occupied
