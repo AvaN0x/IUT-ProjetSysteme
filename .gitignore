@@ -5,5 +5,5 @@ desktop.ini
 .vscode
 
 # Compiled files
-bin/client
-bin/server
+bin/*
+bin/!.gitkeep
