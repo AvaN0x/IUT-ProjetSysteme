@@ -6,4 +6,4 @@ A server and client project in C
 
 The project can be compiled using the `make` command.
 
-And you can execute it with `./src/server` andd `./src/client`.
+And you can execute it with `./src/server` and `./src/client`.
